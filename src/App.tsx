@@ -1,17 +1,29 @@
-
-import { Button } from "@/components/ui/button"
+import { Routes, Route } from 'react-router';
+import { Navigation } from '@/components/Navigation';
+import HomePage from '@/pages/HomePage';
+import CanvasPage from '@/pages/CanvasPage';
+import ProjectsPage from '@/pages/ProjectsPage';
 
 function App() {
-
   return (
-    <div className="p-8">
-      <h1 className="mb-4">Sustainability Canvas</h1>
-      <Button>Test Button</Button>
-      <Button variant="outline" className="ml-4">Outline Button</Button>
-      <Button variant="ghost" className="ml-4">Ghost Button</Button>
-
+    <div className='min-h-screen'>
+      <Navigation />
+      <Routes>
+        <Route
+          path='/'
+          element={<HomePage />}
+        />
+        <Route
+          path='/canvas'
+          element={<CanvasPage />}
+        />
+        <Route
+          path='/projects'
+          element={<ProjectsPage />}
+        />
+      </Routes>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
