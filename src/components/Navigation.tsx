@@ -1,7 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 export function Navigation() {
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav className='w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className=' flex h-14 items-center px-6'>
@@ -16,17 +22,23 @@ export function Navigation() {
           <nav className='flex items-center space-x-8 text-sm font-medium'>
             <Link
               to='/'
-              className='transition-colors hover:text-foreground/80 text-foreground'>
+              className={`transition-colors hover:text-foreground/80 ${
+                isActive('/') ? 'text-foreground font-bold' : 'text-foreground/60'
+              }`}>
               Home
             </Link>
             <Link
               to='/canvas'
-              className='transition-colors hover:text-foreground/80 text-foreground/60'>
+              className={`transition-colors hover:text-foreground/80 ${
+                isActive('/canvas') ? 'text-foreground font-bold' : 'text-foreground/60'
+              }`}>
               Canvas
             </Link>
             <Link
               to='/projects'
-              className='transition-colors hover:text-foreground/80 text-foreground/60'>
+              className={`transition-colors hover:text-foreground/80 ${
+                isActive('/projects') ? 'text-foreground font-bold' : 'text-foreground/60'
+              }`}>
               Projects
             </Link>
           </nav>
