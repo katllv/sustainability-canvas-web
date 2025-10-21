@@ -31,8 +31,9 @@ export async function getProject(projectId: string) {
         .select(`
             *,
             project_collaborators(
-                profiles(name, profile_url),
-                role
+                user_id,
+                role,
+                profiles(name, picture_url)
             )
         `)
         .eq('id', projectId)
