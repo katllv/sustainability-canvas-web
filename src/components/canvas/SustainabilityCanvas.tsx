@@ -1,75 +1,114 @@
 import { CanvasSection } from './CanvasSection';
+import { useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { getProjectImpacts, type Impact } from '@/api/impacts';
 
 export function SustainabilityCanvas() {
+  const { id: projectId } = useParams();
+  const [impacts, setImpacts] = useState<Impact[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadImpacts = async () => {
+      if (!projectId) return;
+
+      try {
+        const { data, error } = await getProjectImpacts(projectId);
+        if (data && !error) {
+          setImpacts(data);
+        }
+      } catch (error) {
+        console.error('Error loading impacts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImpacts();
+  }, [projectId]);
+
+  // Helper function to get impacts for a specific section
+  const getImpactsForSection = (sectionType: string) => {
+    return impacts.filter((impact) => impact.section_type === sectionType);
+  };
+
+  if (loading) {
+    return (
+      <div className='w-full h-full flex items-center justify-center'>
+        <div className='text-gray-600'>Loading canvas...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className='w-full p-6'>
-      <div className='grid grid-cols-5 gap-4 mb-4'>
+    <div className='w-full h-full flex flex-col gap-3 min-h-0'>
+      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0'>
         {/* First Row */}
         <CanvasSection
           title='Key Stakeholders (KS)'
-          description='Who are your key partners and stakeholders?'
           backgroundColor='bg-the-light-blue border-the-light-blue'
+          impacts={getImpactsForSection('KS')}
         />
         <CanvasSection
           title='Key Activities (KA)'
-          description='What key activities does your value proposition require?'
           backgroundColor='bg-the-light-blue border-the-light-blue'
+          impacts={getImpactsForSection('KA')}
         />
         <CanvasSection
           title='Unique Value Proposition (UVP)'
-          description='What unique value do you deliver to customers?'
           backgroundColor='bg-the-lavender'
+          impacts={getImpactsForSection('UVP')}
         />
         <CanvasSection
           title='Customer Relationship (CR)'
-          description='How do you build relationships with customers?'
           backgroundColor='bg-the-yellow'
+          impacts={getImpactsForSection('CR')}
         />
         <CanvasSection
           title='Customer Segment (CS)'
-          description='Who are your target customers?'
           backgroundColor='bg-the-yellow'
+          impacts={getImpactsForSection('CS')}
         />
       </div>
 
-      <div className='grid grid-cols-5 gap-4'>
+      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0'>
         {/* Second Row */}
         <CanvasSection
           title='Waste Management (WM)'
-          description='How do you handle waste and circular economy?'
           backgroundColor='bg-the-light-blue'
+          impacts={getImpactsForSection('WM')}
         />
         <CanvasSection
           title='Key Technology & Resources (KTR)'
-          description='What key resources and technologies do you need?'
           backgroundColor='bg-the-light-blue'
+          impacts={getImpactsForSection('KTR')}
         />
 
         {/* Cost and Revenue Column */}
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-3'>
           <CanvasSection
             title='Cost (CO)'
-            description='What are your key costs?'
             backgroundColor='bg-the-orange'
             className='flex-1'
+            impacts={getImpactsForSection('CO')}
           />
           <CanvasSection
             title='Revenue (RE)'
-            description='How do you generate revenue?'
             backgroundColor='bg-the-green'
             className='flex-1'
+            impacts={getImpactsForSection('RE')}
           />
         </div>
 
         <CanvasSection
           title='Channels (CH)'
-          description='Through which channels do you reach customers?'
           backgroundColor='bg-the-yellow'
+          impacts={getImpactsForSection('CH')}
         />
         <CanvasSection
           title='Governance (GO)'
-          description='How is your organization governed?'
           backgroundColor='bg-the-yellow'
+          impacts={getImpactsForSection('GO')}
         />
       </div>
     </div>
