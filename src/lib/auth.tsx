@@ -1,99 +1,167 @@
+// --- Auth Context & API integration ---
+// Endpoints:
+// - Login:         [POST]   /api/auth/login
+// - Register:      [POST]   /api/auth/register
+// - Get Session:   [GET]    /api/auth/session (or similar, if implemented)
+// - Logout:        [POST]   /api/auth/logout (or custom logic)
+//
+// This file provides React context for authentication state and profile loading.
+// Refactor the effect and signOut logic to use the above endpoints and localStorage/cookies for JWT/session management.
+//
+// Usage: Wrap your app in <AuthProvider> and use the useAuth() hook for access to user, session, profile, loading, and signOut.
+
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabaseClient';
-import { getProfile } from '@/api/profiles';
+import { jwtDecode } from 'jwt-decode';
 
 interface Profile {
   id: string;
   name: string | null;
   picture_url: string | null;
+  email: string | null;
+}
+
+interface RegisterInput {
+  username: string;
+  password: string;
+  name: string;
+  email: string;
+  registrationCode: string;
 }
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signOut: () => Promise<void>;
+  login: (username: string, password: string) => Promise<boolean>;
+  register: (input: RegisterInput) => Promise<boolean>;
+  signOut: () => void;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
+  // On mount, check for JWT in localStorage and fetch profile if present
   useEffect(() => {
-    // Get initial session
-    const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-
-      // Load profile if user exists
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data, error }) => {
-            if (data && !error) {
-              setProfile(data);
-            } else {
+    const token = localStorage.getItem('jwt');
+    if (token) {
+      setToken(token);
+      try {
+        const decoded: any = jwtDecode(token);
+        const userId = decoded?.userId || decoded?.sub;
+        if (userId) {
+          // Try to fetch profile from API
+          fetch(`/api/profiles/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((profile) => {
+              if (profile) {
+                setProfile({
+                  id: String(profile.id || profile.Id),
+                  name: profile.name || profile.Name || null,
+                  picture_url: null,
+                  email: profile.email || profile.Email || null,
+                });
+              } else {
+                setProfile(null);
+              }
+              setLoading(false);
+            })
+            .catch(() => {
               setProfile(null);
-            }
-          });
-      } else {
+              setLoading(false);
+            });
+          return;
+        }
+      } catch {
+        // Invalid token
         setProfile(null);
       }
-
-      setLoading(false);
-    };
-
-    getSession();
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-
-      // Load profile when user signs in
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data, error }) => {
-            if (data && !error) {
-              setProfile(data);
-            } else {
-              setProfile(null);
-            }
-          });
-      } else {
-        setProfile(null);
-      }
-
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    }
+    setLoading(false);
   }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  // Set profile and token from login/register response
+  const setAuthFromResponse = (data: any) => {
+    // data: { message, token, user: { Id, Username, Role, Profile: { Id, Name, Email } } }
+    setToken(data.token);
+    localStorage.setItem('jwt', data.token);
+    if (data.user && data.user.Profile) {
+      setProfile({
+        id: String(data.user.Profile.Id),
+        name: data.user.Profile.Name,
+        picture_url: null, // Add if available
+        email: data.user.Profile.Email || null,
+      });
+    } else {
+      setProfile(null);
+    }
+  };
+
+  // API base URL
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Login function (username, password)
+  const login = async (username: string, password: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!res.ok) throw new Error('Login failed');
+      const data = await res.json();
+      setAuthFromResponse(data);
+      setLoading(false);
+      return true;
+    } catch {
+      setProfile(null);
+      setToken(null);
+      localStorage.removeItem('jwt');
+      setLoading(false);
+      return false;
+    }
+  };
+
+  // Register function
+  const register = async (input: RegisterInput) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) throw new Error('Register failed');
+      const data = await res.json();
+      setAuthFromResponse(data);
+      setLoading(false);
+      return true;
+    } catch {
+      setProfile(null);
+      setToken(null);
+      localStorage.removeItem('jwt');
+      setLoading(false);
+      return false;
+    }
+  };
+
+  // Sign out: remove JWT and clear state
+  const signOut = () => {
+    setProfile(null);
+    setToken(null);
+    localStorage.removeItem('jwt');
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ profile, loading, login, register, signOut, token }}>
       {children}
     </AuthContext.Provider>
   );

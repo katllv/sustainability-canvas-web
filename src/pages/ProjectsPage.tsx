@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Calendar, Users } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-import { getProjects } from '@/api/projects';
+import { getProjectsByProfileId } from '@/api/projects';
 import { useEffect, useState } from 'react';
 
 interface Project {
@@ -16,16 +16,16 @@ interface Project {
 }
 
 export default function ProjectsPage() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadProjects = async () => {
-      if (!user) return;
+      if (!profile) return;
 
       try {
-        const { data, error } = await getProjects(user.id);
+        const { data, error } = await getProjectsByProfileId(profile.id);
         if (data && !error) {
           setProjects(data);
         }
@@ -37,7 +37,7 @@ export default function ProjectsPage() {
     };
 
     loadProjects();
-  }, [user]);
+  }, [profile]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

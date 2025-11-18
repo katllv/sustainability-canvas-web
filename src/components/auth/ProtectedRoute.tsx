@@ -1,12 +1,12 @@
 import { useAuth } from '@/lib/auth';
-import LoginPage from '@/pages/LoginPage';
+import { Navigate } from 'react-router';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -19,8 +19,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user) {
-    return <LoginPage />;
+  if (!profile) {
+    return (
+      <Navigate
+        to='/login'
+        replace
+      />
+    );
   }
 
   return <>{children}</>;

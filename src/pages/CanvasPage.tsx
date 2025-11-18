@@ -10,13 +10,13 @@ interface Project {
   title: string;
   description: string | null;
   project_collaborators: Array<{
-    user_id: string;
+    profile_id: string;
     role: string;
   }>;
 }
 
 export default function CanvasPage() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const { id: projectId } = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,17 +24,18 @@ export default function CanvasPage() {
 
   useEffect(() => {
     const loadProject = async () => {
-      if (!projectId || !user) return;
+      if (!projectId || !profile) return;
 
       try {
         const { data, error } = await getProject(projectId);
         if (data && !error) {
           setProject(data);
-          // Check if current user is a collaborator
-          const userHasAccess = data.project_collaborators?.some(
-            (collaborator: { user_id: string; role: string }) => collaborator.user_id === user.id,
+          // Check if current profile is a collaborator
+          const profileHasAccess = data.project_collaborators?.some(
+            (collaborator: { profile_id: string; role: string }) =>
+              collaborator.profile_id === profile.id,
           );
-          setHasAccess(userHasAccess);
+          setHasAccess(profileHasAccess);
         }
       } catch (error) {
         console.error('Error loading project:', error);
@@ -45,7 +46,7 @@ export default function CanvasPage() {
     };
 
     loadProject();
-  }, [projectId, user]);
+  }, [projectId, profile]);
 
   if (loading) {
     return (
@@ -57,7 +58,7 @@ export default function CanvasPage() {
     );
   }
 
-  // Redirect to projects if user doesn't have access
+  // Redirect to projects if profile doesn't have access
   if (!hasAccess) {
     return (
       <Navigate

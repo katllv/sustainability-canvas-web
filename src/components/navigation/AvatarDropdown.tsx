@@ -40,7 +40,7 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className='p-2 min-w-xs'
+        className='p-2 min-w-sm'
         sideOffset={20}>
         <DropdownMenuLabel className='flex flex-row items-center gap-4 p-4'>
           <Avatar className='w-14 h-14'>

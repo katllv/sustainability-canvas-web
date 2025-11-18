@@ -18,7 +18,7 @@ import { createProject } from '@/api/projects';
 import { useNavigate } from 'react-router';
 
 export function AddProjectDialog() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
@@ -26,30 +26,23 @@ export function AddProjectDialog() {
   const [loading, setLoading] = useState(false);
 
   const handleCreateProject = async () => {
-    if (!user || !projectName.trim()) return;
+    if (!profile || !projectName.trim()) return;
 
     setLoading(true);
     try {
-      const { data, error } = await createProject(
-        user.id,
-        projectName.trim(),
-        description.trim() || undefined,
-      );
+      const data = await createProject({
+        userId: profile.id,
+        title: projectName.trim(),
+        description: description.trim() || undefined,
+      });
 
-      if (error) {
-        toast.error('Failed to create project');
-        console.error('Error creating project:', error);
-        return;
-      }
-
-      if (data) {
-        toast.success(`Project "${projectName}" created successfully!`);
-        setOpen(false);
-        setProjectName('');
-        setDescription('');
-        // Navigate to the new project's canvas
-        navigate(`/project/${data.id}/canvas`);
-      }
+      toast.success(`Project "${projectName}" created successfully!`);
+      setOpen(false);
+      setProjectName('');
+      setDescription('');
+      // Navigate to the new project's canvas
+      // `data` is expected to be the created project returned by the API
+      navigate(`/project/${(data as any).id}/canvas`);
     } catch (error) {
       toast.error('Failed to create project');
       console.error('Error creating project:', error);

@@ -1,28 +1,29 @@
 import { useEffect } from 'react';
 import { Navigate } from 'react-router';
 import { useAuth } from '@/lib/auth';
-import { getProjects } from '@/api/projects';
+import { getProjectsByProfileId } from '@/api/projects';
 import { useState } from 'react';
 
 export function ProjectRedirect() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const findOldestProject = async () => {
-      if (!user) {
+      if (!profile) {
         setLoading(false);
         return;
       }
 
       try {
-        const { data: projects, error } = await getProjects(user.id);
+        const { data: projects, error } = await getProjectsByProfileId(profile.id);
 
         if (projects && projects.length > 0 && !error) {
           // Sort by created_at to get the oldest project
           const sortedProjects = projects.sort(
-            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            (a: { created_at: string }, b: { created_at: string }) =>
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
           );
           const oldestProject = sortedProjects[0];
           setRedirectPath(`/project/${oldestProject.id}/canvas`);
@@ -39,7 +40,7 @@ export function ProjectRedirect() {
     };
 
     findOldestProject();
-  }, [user]);
+  }, [profile]);
 
   if (loading) {
     return (
