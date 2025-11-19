@@ -14,7 +14,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const token = localStorage.getItem('jwt') || '';
 
 export async function getProfile(userId: string) {
-    const res = await fetch(`${API_URL}/api/profiles/${userId}`, {
+    const res = await fetch(`${API_URL}/profiles/${userId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -24,7 +24,7 @@ export async function getProfile(userId: string) {
 }
 
 export async function updateProfile(userId: string, updates: { name?: string; picture_url?: string }) {
-    const res = await fetch(`${API_URL}/api/profiles/${userId}`, {
+    const res = await fetch(`${API_URL}/profiles/${userId}`, {
         method: 'PUT',
         headers: { 
             'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ export async function updateProfile(userId: string, updates: { name?: string; pi
 }
 
 export async function getProjectCollaborators(projectId: string) {
-    const res = await fetch(`${API_URL}/api/projects/${projectId}/collaborators`, {
+    const res = await fetch(`${API_URL}/projects/${projectId}/collaborators`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -47,7 +47,7 @@ export async function getProjectCollaborators(projectId: string) {
 }
 
 export async function addCollaborator(projectId: string, userId: string, role: 'owner' | 'editor' | 'viewer') {
-    const res = await fetch(`${API_URL}/api/projects/${projectId}/collaborators`, {
+    const res = await fetch(`${API_URL}/projects/${projectId}/collaborators`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export async function addCollaborator(projectId: string, userId: string, role: '
 }
 
 export async function updateCollaboratorRole(collaboratorId: string, role: 'owner' | 'editor' | 'viewer') {
-    const res = await fetch(`${API_URL}/api/collaborators/${collaboratorId}`, {
+    const res = await fetch(`${API_URL}/collaborators/${collaboratorId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ role }),
@@ -70,7 +70,7 @@ export async function updateCollaboratorRole(collaboratorId: string, role: 'owne
 }
 
 export async function removeCollaborator(collaboratorId: string) {
-    const res = await fetch(`${API_URL}/api/collaborators/${collaboratorId}`, {
+    const res = await fetch(`${API_URL}/collaborators/${collaboratorId}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${token}`,

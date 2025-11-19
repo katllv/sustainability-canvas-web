@@ -7,14 +7,24 @@ const API_URL = import.meta.env.VITE_API_URL;
 // TanStack Query hooks:
 // - useAllSDGs, useImpactsForSDG
 
+const token = localStorage.getItem('jwt') || '';
+
 export async function getAllSDGs() {
-    const res = await fetch(`${API_URL}/api/sdgs`);
+    const res = await fetch(`${API_URL}/sdgs`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     if (!res.ok) throw new Error('Failed to fetch SDGs');
     return res.json();
 }
 
 export async function getImpactsForSDG(sdgId: string) {
-    const res = await fetch(`${API_URL}/api/sdgs/${sdgId}/impacts`);
+    const res = await fetch(`${API_URL}/sdgs/${sdgId}/impacts`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     if (!res.ok) throw new Error('Failed to fetch impacts for SDG');
     return res.json();
 }

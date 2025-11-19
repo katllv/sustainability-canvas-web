@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const token = localStorage.getItem('jwt') || '';
 
 export async function createAdmin(user: { email: string; password: string }) {
-	const res = await fetch(`${API_URL}/api/users/admin/create`, {
+	const res = await fetch(`${API_URL}/users/admin/create`, {
 		method: 'POST',
 		body: JSON.stringify(user),
 	});
@@ -17,7 +17,7 @@ export async function createAdmin(user: { email: string; password: string }) {
 }
 
 export async function deleteUser(userId: string) {
-	const res = await fetch(`${API_URL}/api/users/admin/${userId}`, {
+	const res = await fetch(`${API_URL}/users/admin/${userId}`, {
 		method: 'DELETE',
 		headers: {
 			Authorization: `Bearer ${token}`,
@@ -28,7 +28,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function getAllUsers() {
-	const res = await fetch(`${API_URL}/api/users/admin/all`, {
+	const res = await fetch(`${API_URL}/users/admin/all`, {
 		headers: {
 			Authorization: `Bearer ${token}`,
 		},
