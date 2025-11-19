@@ -12,6 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 // TanStack Query hooks:
 // - useProjectImpacts, useCreateImpact, useUpdateImpact, useDeleteImpact
 
+const token = localStorage.getItem('jwt') || '';
 
 export type SectionType = 'UVP' | 'CS' | 'CR' | 'CH' | 'GO' | 'KS' | 'KA' | 'WM' | 'KTR' | 'CO' | 'RE'
 export type RelationType = 'Direct' | 'Indirect' | 'Hidden'
@@ -29,13 +30,21 @@ export interface Impact {
 }
 
 export async function getProjectImpacts(projectId: string) {
-    const res = await fetch(`${API_URL}/projects/${projectId}/impacts`);
+    const res = await fetch(`${API_URL}/projects/${projectId}/impacts`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     if (!res.ok) throw new Error('Failed to fetch project impacts');
     return res.json();
 }
 
 export async function getImpactsBySection(projectId: string, sectionType: SectionType) {
-    const res = await fetch(`${API_URL}/projects/${projectId}/impacts?sectionType=${sectionType}`);
+    const res = await fetch(`${API_URL}/projects/${projectId}/impacts?sectionType=${sectionType}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     if (!res.ok) throw new Error('Failed to fetch impacts by section');
     return res.json();
 }
@@ -43,7 +52,10 @@ export async function getImpactsBySection(projectId: string, sectionType: Sectio
 export async function createImpact(impact: Omit<Impact, 'id'>) {
     const res = await fetch(`${API_URL}/impacts`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(impact),
     });
     if (!res.ok) throw new Error('Failed to create impact');
@@ -53,7 +65,10 @@ export async function createImpact(impact: Omit<Impact, 'id'>) {
 export async function updateImpact(id: string, updates: Partial<Omit<Impact, 'id' | 'project_id'>>) {
     const res = await fetch(`${API_URL}/impacts/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error('Failed to update impact');
@@ -63,6 +78,9 @@ export async function updateImpact(id: string, updates: Partial<Omit<Impact, 'id
 export async function deleteImpact(id: string) {
     const res = await fetch(`${API_URL}/impacts/${id}`, {
         method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
     });
     if (!res.ok) throw new Error('Failed to delete impact');
     return res.json();

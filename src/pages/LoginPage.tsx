@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +19,7 @@ export default function LoginPage() {
       const ok = await login(username, password);
       if (ok) {
         toast.success('Logged in successfully!');
-        navigate('/');
+        router.navigate({ to: '/' });
       } else toast.error('Login failed.');
     } catch (error: any) {
       toast.error(error.message || 'Authentication error');

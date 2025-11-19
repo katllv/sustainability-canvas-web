@@ -11,8 +11,8 @@ interface Project {
   description: string | null;
   created_at: string;
   updated_at: string;
-  project_collaborators?: Array<{ role: string }>; // make optional
-  impacts?: Array<{ count?: number }>;
+  project_collaborators: Array<{ role: string }>;
+  impacts: Array<{ count?: number }>;
 }
 
 export default function ProjectsPage() {
@@ -22,22 +22,13 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const loadProjects = async () => {
-      if (!profile) {
-        setLoading(false);
-        return;
-      }
+      if (!profile) return;
 
       try {
-        const data = await getProjectsByProfileId(profile.id);
-
-        // ensure project_collaborators is always an array
-        const normalized: Project[] = (data ?? []).map((p: any) => ({
-          ...p,
-          project_collaborators: p.project_collaborators ?? [],
-          impacts: p.impacts ?? [],
-        }));
-
-        setProjects(normalized);
+        const { data, error } = await getProjectsByProfileId(profile.id);
+        if (data && !error) {
+          setProjects(data);
+        }
       } catch (error) {
         console.error('Error loading projects:', error);
       } finally {
@@ -103,7 +94,7 @@ export default function ProjectsPage() {
                   </div>
                   <div className='flex items-center gap-1'>
                     <Users className='w-3 h-3' />
-                    <span>{project.project_collaborators?.length ?? 0} members</span>
+                    <span>{project.project_collaborators.length} members</span>
                   </div>
                 </div>
               </CardContent>

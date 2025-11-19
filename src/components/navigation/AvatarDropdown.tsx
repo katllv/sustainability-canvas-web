@@ -10,6 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
+import { useRouter } from '@tanstack/react-router';
 
 interface AvatarDropdownProps {
   name: string;
@@ -19,11 +20,13 @@ interface AvatarDropdownProps {
 
 export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) {
   const { signOut } = useAuth();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
       await signOut();
       toast.success('Logged out successfully');
+      router.navigate({ to: '/login', replace: true });
     } catch (error) {
       toast.error('Error logging out');
     }

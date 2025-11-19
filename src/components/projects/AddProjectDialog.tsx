@@ -1,3 +1,8 @@
+import { useAuth } from '@/lib/auth';
+import { createProject } from '@/api/projects';
+import { useRouter } from '@tanstack/react-router';
+import { toast } from 'sonner';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -5,21 +10,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useState } from 'react';
+} from '../ui/dialog';
+import { Button } from '../ui/button';
 import { Plus } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '@/lib/auth';
-import { createProject } from '@/api/projects';
-import { useNavigate } from 'react-router';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 
 export function AddProjectDialog() {
   const { profile } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [description, setDescription] = useState('');
@@ -31,7 +30,8 @@ export function AddProjectDialog() {
     setLoading(true);
     try {
       const data = await createProject({
-        userId: profile.id,
+        // 1) make sure this is a number
+        profileId: Number(profile.id),
         title: projectName.trim(),
         description: description.trim() || undefined,
       });
@@ -40,9 +40,12 @@ export function AddProjectDialog() {
       setOpen(false);
       setProjectName('');
       setDescription('');
-      // Navigate to the new project's canvas
-      // `data` is expected to be the created project returned by the API
-      navigate(`/project/${(data as any).id}/canvas`);
+
+      // 2) use route path + params for TanStack Router
+      router.navigate({
+        to: '/projects/$projectId/canvas',
+        params: { projectId: String((data as any).id) },
+      });
     } catch (error) {
       toast.error('Failed to create project');
       console.error('Error creating project:', error);
@@ -56,7 +59,7 @@ export function AddProjectDialog() {
       open={open}
       onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='has-[>svg]:px-5'>
+        <Button className='has-[>svg]:px-5 rounded-full'>
           Add project <Plus />
         </Button>
       </DialogTrigger>

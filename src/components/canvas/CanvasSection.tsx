@@ -21,12 +21,11 @@ export function CanvasSection({
       <CardHeader className='pb-2'>
         <CardTitle className='text-sm'>{title}</CardTitle>
       </CardHeader>
-      <CardContent className=''>
+      <CardContent>
         {description && <p className='text-xs mb-3'>{description}</p>}
 
         <div className='space-y-3'>
           {impacts.length > 0 ? (
-            // Group impacts by relation type
             ['Direct', 'Indirect', 'Hidden'].map((relationType) => {
               const relatedImpacts = impacts.filter(
                 (impact) => impact.relation_type === relationType,
@@ -54,7 +53,7 @@ export function CanvasSection({
               );
             })
           ) : (
-            <div className='text-xs text-gray-500 italic'></div>
+            <div className='text-xs text-gray-500 italic' />
           )}
         </div>
       </CardContent>

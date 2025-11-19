@@ -1,11 +1,9 @@
+import { Route, Navigate } from '@tanstack/react-router';
+import { rootRoute } from './root-route';
+import Root from '../pages/RootLayout';
 import { useAuth } from '@/lib/auth';
-import { Navigate } from 'react-router';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+function AppLayout() {
   const { profile, loading } = useAuth();
 
   if (loading) {
@@ -28,5 +26,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  return <>{children}</>;
+  return <Root />;
 }
+
+export const appLayoutRoute = new Route({
+  getParentRoute: () => rootRoute,
+  id: 'app-layout',
+  component: AppLayout,
+});

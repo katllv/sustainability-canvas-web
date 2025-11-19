@@ -47,7 +47,7 @@ export async function getProject(projectId: string) {
 }
 
 
-export async function createProject(project: { userId: string; title: string; description?: string }) {
+export async function createProject(project: { profileId: number; title: string; description?: string }) {
 	const res = await fetch(`${API_URL}/projects`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -111,13 +111,13 @@ export function useProject(projectId: string) {
 }
 
 export function useCreateProject() {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: createProject,
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['projects'] });
-		},
-	});
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createProject,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
 }
 
 export function useUpdateProject() {

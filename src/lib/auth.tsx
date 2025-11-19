@@ -88,20 +88,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Set profile and token from login/register response
-  const setAuthFromResponse = (data: any) => {
-    // data: { message, token, user: { Id, Username, Role, Profile: { Id, Name, Email } } }
+  const setAuthFromResponse = (data: any): boolean => {
+    // data is expected something like:
+    // { message, token, user: { Id, Username, Role, Profile: { Id, Name, Email } } }
+    if (!data?.token) {
+      setProfile(null);
+      setToken(null);
+      localStorage.removeItem('jwt');
+      return false;
+    }
+
     setToken(data.token);
     localStorage.setItem('jwt', data.token);
-    if (data.user && data.user.Profile) {
-      setProfile({
-        id: String(data.user.Profile.Id),
-        name: data.user.Profile.Name,
-        picture_url: null, // Add if available
-        email: data.user.Profile.Email || null,
-      });
-    } else {
+
+    // Try a few shapes – adjust if you know your exact API shape
+    const rawProfile =
+      data.user?.Profile || // original expected shape
+      data.profile || // maybe backend returns { profile: ... }
+      data.user; // fallback to user object itself
+
+    if (!rawProfile) {
       setProfile(null);
+      return false;
     }
+
+    setProfile({
+      id: String(rawProfile.id ?? rawProfile.Id ?? ''),
+      name: rawProfile.name ?? rawProfile.Name ?? null,
+      picture_url: null,
+      email: rawProfile.email ?? rawProfile.Email ?? null,
+    });
+
+    return true;
   };
 
   // API base URL
@@ -118,9 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (!res.ok) throw new Error('Login failed');
       const data = await res.json();
-      setAuthFromResponse(data);
+
+      const ok = setAuthFromResponse(data);
       setLoading(false);
-      return true;
+      return ok;
     } catch {
       setProfile(null);
       setToken(null);
@@ -134,16 +153,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (input: RegisterInput) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/auth/register`, {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(input),
       });
       if (!res.ok) throw new Error('Register failed');
       const data = await res.json();
-      setAuthFromResponse(data);
+
+      const ok = setAuthFromResponse(data);
       setLoading(false);
-      return true;
+      return ok;
     } catch {
       setProfile(null);
       setToken(null);
