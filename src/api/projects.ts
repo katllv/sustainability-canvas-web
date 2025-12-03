@@ -1,46 +1,58 @@
 // --- Projects API functions ---
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || '';
 // Endpoints:
 // - GetProjects:            [GET]    /api/projects
 // - GetProjectsByProfileId: [GET]    /api/profiles/{profileId}/projects
 // - GetUserProjects:        [GET]    /api/profiles/{profileId}/collaborations
+// - GetUserProjectsFull:    [GET]    /api/profiles/{profileId}/projects-full
 // - GetProjectById:         [GET]    /api/projects/{id}
 // - CreateProject:          [POST]   /api/projects
 // - UpdateProject:          [PUT]    /api/projects/{id}
 // - DeleteProject:          [DELETE] /api/projects/{id}
 //
 // TanStack Query hooks:
-// - useProjects, useProjectsByProfileId, useUserProjects, useProject, useCreateProject, useUpdateProject, useDeleteProject
+// - useProjects, useProjectsByProfileId, useUserProjects, useUserProjectsFull, useProject, useCreateProject, useUpdateProject, useDeleteProject
 
-const token = localStorage.getItem('jwt') || '';
+const getToken = () => localStorage.getItem('jwt') || '';
 
 export async function getProjects() {
-	const res = await fetch(`${API_URL}/projects`, {
-		headers: { Authorization: `Bearer ${token}` },
+	const res = await fetch(`${API_URL}/api/projects`, {
+		headers: { Authorization: `Bearer ${getToken()}` },
 	});
 	if (!res.ok) throw new Error('Failed to fetch projects');
 	return res.json();
 }
 
-export async function getProjectsByProfileId(profileId: string) {
-	const res = await fetch(`${API_URL}/profiles/${profileId}/projects`, {
-		headers: { Authorization: `Bearer ${token}` },
+export async function getProjectsByProfileId(profileId: string | number) {
+	const id = typeof profileId === 'string' ? parseInt(profileId, 10) : profileId;
+	const res = await fetch(`${API_URL}/api/profiles/${id}/projects`, {
+		headers: { Authorization: `Bearer ${getToken()}` },
 	});
 	if (!res.ok) throw new Error('Failed to fetch projects by profile');
 	return res.json();
 }
 
-export async function getUserProjects(profileId: string) {
-	const res = await fetch(`${API_URL}/profiles/${profileId}/collaborations`, {
-		headers: { Authorization: `Bearer ${token}` },
+export async function getUserProjects(profileId: string | number) {
+	const id = typeof profileId === 'string' ? parseInt(profileId, 10) : profileId;
+	const res = await fetch(`${API_URL}/api/profiles/${id}/collaborations`, {
+		headers: { Authorization: `Bearer ${getToken()}` },
 	});
 	if (!res.ok) throw new Error('Failed to fetch user collaborations');
 	return res.json();
 }
 
+export async function getUserProjectsFull(profileId: string | number) {
+	const id = typeof profileId === 'string' ? parseInt(profileId, 10) : profileId;
+	const res = await fetch(`${API_URL}/api/profiles/${id}/projects-full`, {
+		headers: { Authorization: `Bearer ${getToken()}` },
+	});
+	if (!res.ok) throw new Error('Failed to fetch user projects with collaborators');
+	return res.json();
+}
+
 export async function getProject(projectId: string) {
-	const res = await fetch(`${API_URL}/projects/${projectId}`, {
-		headers: { Authorization: `Bearer ${token}` },
+	const res = await fetch(`${API_URL}/api/projects/${projectId}`, {
+		headers: { Authorization: `Bearer ${getToken()}` },
 	});
 	if (!res.ok) throw new Error('Failed to fetch project');
 	return res.json();
@@ -48,9 +60,9 @@ export async function getProject(projectId: string) {
 
 
 export async function createProject(project: { profileId: number; title: string; description?: string }) {
-	const res = await fetch(`${API_URL}/projects`, {
+	const res = await fetch(`${API_URL}/api/projects`, {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
 		body: JSON.stringify(project),
 	});
 	if (!res.ok) throw new Error('Failed to create project');
@@ -58,9 +70,9 @@ export async function createProject(project: { profileId: number; title: string;
 }
 
 export async function updateProject(id: string, updates: { title?: string; description?: string }) {
-	const res = await fetch(`${API_URL}/projects/${id}`, {
+	const res = await fetch(`${API_URL}/api/projects/${id}`, {
 		method: 'PUT',
-		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
 		body: JSON.stringify(updates),
 	});
 	if (!res.ok) throw new Error('Failed to update project');
@@ -68,9 +80,9 @@ export async function updateProject(id: string, updates: { title?: string; descr
 }
 
 export async function deleteProject(id: string) {
-	const res = await fetch(`${API_URL}/projects/${id}`, {
+	const res = await fetch(`${API_URL}/api/projects/${id}`, {
 		method: 'DELETE',
-		headers: { Authorization: `Bearer ${token}` },
+		headers: { Authorization: `Bearer ${getToken()}` },
 	});
 	if (!res.ok) throw new Error('Failed to delete project');
 	return res.json();
@@ -86,18 +98,26 @@ export function useProjects() {
 	});
 }
 
-export function useProjectsByProfileId(profileId: string) {
+export function useProjectsByProfileId(profileId: string | number) {
 	return useQuery({
 		queryKey: ['projectsByProfile', profileId],
 		queryFn: () => getProjectsByProfileId(profileId),
+		enabled: !!profileId,	
+	});
+}
+
+export function useCollaboratorProjects(profileId: string | number) {
+	return useQuery({
+		queryKey: ['collaboratorProjects', profileId],
+		queryFn: () => getUserProjects(profileId),
 		enabled: !!profileId,
 	});
 }
 
-export function useUserProjects(profileId: string) {
+export function useUserProjectsFull(profileId: string | number) {
 	return useQuery({
-		queryKey: ['userProjects', profileId],
-		queryFn: () => getUserProjects(profileId),
+		queryKey: ['projects', profileId],
+		queryFn: () => getUserProjectsFull(profileId),
 		enabled: !!profileId,
 	});
 }

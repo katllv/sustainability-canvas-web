@@ -1,48 +1,12 @@
 import { SustainabilityCanvas } from '@/components/canvas';
-import { Pencil } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getProject } from '@/api/projects';
+import { Download, Pencil, Printer, Upload } from 'lucide-react';
+import { useProject } from '@/api/projects';
 import { useParams, Navigate } from '@tanstack/react-router';
-
-interface Project {
-  id: string;
-  title: string;
-  description: string | null;
-  project_collaborators?: Array<{
-    profile_id: string;
-    role: string;
-  }>;
-}
 
 export default function CanvasPage() {
   // route: /app-layout/projects/$projectId/canvas
   const { projectId } = useParams({ from: '/app-layout/projects/$projectId' });
-
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    const loadProject = async () => {
-      if (!projectId) {
-        setLoading(false);
-        setLoadError(true);
-        return;
-      }
-
-      try {
-        const data = await getProject(projectId);
-        setProject(data);
-      } catch (error) {
-        console.error('Error loading project:', error);
-        setLoadError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProject();
-  }, [projectId]);
+  const { data: project, isLoading: loading, isError: loadError } = useProject(projectId);
 
   if (loading) {
     return (
@@ -65,12 +29,20 @@ export default function CanvasPage() {
   }
 
   return (
-    <div className='flex flex-col h-full'>
-      <div className='flex items-baseline gap-3 mb-6'>
-        <h2>{project.title || 'Untitled Project'}</h2>
-        <Pencil className='text-the-dark-blue size-5' />
+    <div className='flex flex-1 flex-col h-full'>
+      <div className='flex flex-1 items-baseline justify-between gap-3 mb-6'>
+        <div className='flex items-baseline gap-3'>
+          <h2>{project.title || 'Untitled Project'}</h2>
+          <Pencil />
+        </div>
+        <div className='flex gap-3'>
+          <Printer />
+          <Download />
+        </div>
       </div>
-      <SustainabilityCanvas projectId={projectId} />
+      <div className='h-150'>
+        <SustainabilityCanvas projectId={projectId} />
+      </div>
     </div>
   );
 }

@@ -35,6 +35,26 @@ const categoryDistributionData = [
 
 const categoryColors = ['#60a5fa', '#fb923c', '#4ade80'];
 
+const sdgColors = [
+  '#e5243b',
+  '#dda63a',
+  '#4c9f38',
+  '#c5192d',
+  '#ff3a21',
+  '#26bde2',
+  '#fcc30b',
+  '#a21942',
+  '#fd6925',
+  '#dd1367',
+  '#fd9d24',
+  '#bf8b2e',
+  '#3f7e44',
+  '#0a97d9',
+  '#56c02b',
+  '#00689d',
+  '#19486a',
+];
+
 const sdgBarData = [
   { sdg: 'SDG 1', count: 11 },
   { sdg: 'SDG 2', count: 8 },
@@ -76,7 +96,7 @@ const sdgReference = [
 ];
 
 export default function AnalysisPage() {
-  const { projectId } = useParams({ from: '/app-layout/projects/$projectId' });
+  // const { projectId } = useParams({ from: '/app-layout/projects/$projectId' });
   // later: use projectId to fetch real stats
 
   return (
@@ -84,15 +104,10 @@ export default function AnalysisPage() {
       <div className='flex items-center justify-between mb-6 flex-shrink-0'>
         <div className='flex items-baseline gap-3'>
           <h2 className='text-2xl font-semibold text-the-dark-blue'>Project Analysis</h2>
-          {projectId && <span className='text-xs text-gray-500'>Project ID: {projectId}</span>}
         </div>
         <div className='flex gap-2'>
-          <button className='p-2 rounded-full border text-gray-500 hover:bg-gray-50'>
-            <Printer className='w-4 h-4' />
-          </button>
-          <button className='p-2 rounded-full border text-gray-500 hover:bg-gray-50'>
-            <Download className='w-4 h-4' />
-          </button>
+          <Printer />
+          <Download />
         </div>
       </div>
 
@@ -139,7 +154,7 @@ export default function AnalysisPage() {
               <p className='text-xs text-gray-500'>Distribution of impact types across entries</p>
             </CardHeader>
             <CardContent className='h-full flex flex-col'>
-              <div className='flex-1 flex items-center justify-center'>
+              <div className='flex-1 flex items-center justify-center w-full min-w-0'>
                 <ResponsiveContainer
                   width='100%'
                   height='100%'>
@@ -148,7 +163,6 @@ export default function AnalysisPage() {
                       data={impactDistributionData}
                       dataKey='value'
                       nameKey='name'
-                      innerRadius={60}
                       outerRadius={90}>
                       {impactDistributionData.map((entry, index) => (
                         <Cell
@@ -183,7 +197,7 @@ export default function AnalysisPage() {
               <p className='text-xs text-gray-500'>Distribution across categories</p>
             </CardHeader>
             <CardContent className='h-full flex flex-col'>
-              <div className='flex-1 flex items-center justify-center'>
+              <div className='flex-1 flex items-center justify-center w-full min-w-0'>
                 <ResponsiveContainer
                   width='100%'
                   height='100%'>
@@ -192,7 +206,6 @@ export default function AnalysisPage() {
                       data={categoryDistributionData}
                       dataKey='value'
                       nameKey='name'
-                      innerRadius={60}
                       outerRadius={90}>
                       {categoryDistributionData.map((entry, index) => (
                         <Cell
@@ -222,30 +235,40 @@ export default function AnalysisPage() {
           </Card>
         </div>
 
-        <Card className='h-[360px]'>
+        <Card>
           <CardHeader className='pb-2'>
             <CardTitle className='text-sm text-the-dark-blue'>
               Sustainable Development Goals (SDGs)
             </CardTitle>
             <p className='text-xs text-gray-500'>Number of entries per SDG</p>
           </CardHeader>
-          <CardContent className='h-full'>
-            <ResponsiveContainer
-              width='100%'
-              height='100%'>
-              <BarChart data={sdgBarData}>
-                <XAxis
-                  dataKey='sdg'
-                  tick={{ fontSize: 10 }}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar
-                  dataKey='count'
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent>
+            {/* fixed-height container so Recharts always has >0 height */}
+            <div className='w-full min-w-0'>
+              <ResponsiveContainer
+                width='100%'
+                height={280} // <- key change
+                minWidth={0}>
+                <BarChart data={sdgBarData}>
+                  <XAxis
+                    dataKey='sdg'
+                    tick={{ fontSize: 10 }}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar
+                    dataKey='count'
+                    radius={[4, 4, 0, 0]}>
+                    {sdgBarData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={sdgColors[index % sdgColors.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
@@ -260,9 +283,17 @@ export default function AnalysisPage() {
                 <div
                   key={sdg.id}
                   className='flex items-center justify-between rounded-xl border px-3 py-2 bg-white'>
-                  <div>
-                    <div className='text-xs font-semibold text-the-dark-blue'>SDG {sdg.id}</div>
-                    <div className='text-[11px] text-gray-500'>{sdg.name}</div>
+                  <div className='flex items-center gap-2'>
+                    <span
+                      className='w-3 h-3 rounded-full'
+                      style={{
+                        backgroundColor: sdgColors[(sdg.id - 1) % sdgColors.length],
+                      }}
+                    />
+                    <div>
+                      <div className='text-xs font-semibold text-the-dark-blue'>SDG {sdg.id}</div>
+                      <div className='text-[11px] text-gray-500'>{sdg.name}</div>
+                    </div>
                   </div>
                   <div className='inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-[11px] text-gray-700'>
                     {sdg.count}

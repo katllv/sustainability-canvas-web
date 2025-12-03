@@ -8,7 +8,7 @@ import { Field, FieldError } from '@/components/ui/field';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading } = useAuth();
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const ok = await login(username, password);
+      const ok = await login(email, password);
       if (ok) {
         toast.success('Logged in successfully!');
         router.navigate({ to: '/' });
@@ -39,11 +39,11 @@ export default function LoginPage() {
             className='space-y-4'>
             <Field>
               <Input
-                id='username'
+                id='email'
                 type='text'
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder='Enter username'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder='Enter email'
                 required
               />
               <FieldError />

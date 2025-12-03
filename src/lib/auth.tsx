@@ -13,6 +13,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 interface Profile {
   id: string;
   name: string | null;
@@ -21,7 +23,6 @@ interface Profile {
 }
 
 interface RegisterInput {
-  username: string;
   password: string;
   name: string;
   email: string;
@@ -54,12 +55,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userId = decoded?.userId || decoded?.sub;
         if (userId) {
           // Try to fetch profile from API
-          fetch(`/api/profiles/${userId}`, {
+          const url = `${API_URL}/api/profiles/${userId}`;
+          fetch(url, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           })
-            .then((res) => (res.ok ? res.json() : null))
+            .then((res) => {
+              if (res.ok) return res.json();
+              // If 401, token is invalid - clear it
+              if (res.status === 401) {
+                localStorage.removeItem('jwt');
+                setToken(null);
+              }
+              return null;
+            })
             .then((profile) => {
               if (profile) {
                 setProfile({
@@ -122,17 +132,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
-  // API base URL
-  const API_URL = import.meta.env.VITE_API_URL;
-
   // Login function (username, password)
   const login = async (username: string, password: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ Email: username, Password: password }),
       });
       if (!res.ok) throw new Error('Login failed');
       const data = await res.json();
@@ -153,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (input: RegisterInput) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/auth/register`, {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(input),

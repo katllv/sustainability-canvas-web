@@ -1,5 +1,5 @@
 // --- SDGs API functions ---
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || '';
 // Endpoints:
 // - GetSdgs:         [GET] /api/sdgs
 // - GetImpactsForSDG:[GET] /api/sdgs/{sdgId}/impacts
@@ -7,12 +7,12 @@ const API_URL = import.meta.env.VITE_API_URL;
 // TanStack Query hooks:
 // - useAllSDGs, useImpactsForSDG
 
-const token = localStorage.getItem('jwt') || '';
+const getToken = () => localStorage.getItem('jwt') || '';
 
 export async function getAllSDGs() {
-    const res = await fetch(`${API_URL}/sdgs`, {
+    const res = await fetch(`${API_URL}/api/sdgs`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
         },
     });
     if (!res.ok) throw new Error('Failed to fetch SDGs');
@@ -20,9 +20,9 @@ export async function getAllSDGs() {
 }
 
 export async function getImpactsForSDG(sdgId: string) {
-    const res = await fetch(`${API_URL}/sdgs/${sdgId}/impacts`, {
+    const res = await fetch(`${API_URL}/api/sdgs/${sdgId}/impacts`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
         },
     });
     if (!res.ok) throw new Error('Failed to fetch impacts for SDG');

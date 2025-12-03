@@ -2,25 +2,28 @@ import { useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
 export default function SignUpPage() {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [registrationCode, setRegistrationCode] = useState('');
   const { register, loading } = useAuth();
+  const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const ok = await register({ username, password, name, email, registrationCode });
-      if (ok) toast.success('Registered successfully!');
-      else toast.error('Registration failed.');
+      const ok = await register({ password, name, email, registrationCode });
+      if (ok) {
+        toast.success('Registered successfully!');
+        // Redirect to login page
+        router.navigate({ to: '/login' });
+      } else toast.error('Registration failed.');
     } catch (error: any) {
       toast.error(error.message || 'Authentication error');
     }
@@ -63,18 +66,6 @@ export default function SignUpPage() {
 
             <Field>
               <Input
-                id='username'
-                type='text'
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder='Enter username'
-                required
-              />
-              <FieldError />
-            </Field>
-
-            <Field>
-              <Input
                 id='password'
                 type='password'
                 value={password}
@@ -101,7 +92,7 @@ export default function SignUpPage() {
               type='submit'
               className='w-full mt-10'
               disabled={loading}>
-              {loading ? 'Loading...' : 'Log In'}
+              {loading ? 'Loading...' : 'Sign Up'}
             </Button>
           </form>
 

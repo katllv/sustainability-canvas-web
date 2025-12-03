@@ -5,7 +5,7 @@ function Root() {
   return (
     <div className='min-h-screen flex flex-col bg-the-light-grey'>
       <Header />
-      <div className='flex-1 px-6 lg:px-20 py-6'>
+      <div className='flex-1 min-h-0 px-6 lg:px-20 py-6'>
         <Outlet />
       </div>
     </div>

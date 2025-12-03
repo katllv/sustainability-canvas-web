@@ -7,6 +7,7 @@ interface CanvasSectionProps {
   className?: string;
   backgroundColor?: string;
   impacts?: Impact[];
+  onClick?: () => void;
 }
 
 export function CanvasSection({
@@ -15,21 +16,32 @@ export function CanvasSection({
   className = '',
   backgroundColor = 'bg-card',
   impacts = [],
+  onClick,
 }: CanvasSectionProps) {
+  const clickableClass = onClick ? 'cursor-pointer' : '';
+
   return (
-    <Card className={`${backgroundColor} h-full ${className}`}>
+    <Card
+      className={`${backgroundColor} h-full ${className} ${clickableClass}`}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (!onClick) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      data-section-title={title}>
       <CardHeader className='pb-2'>
         <CardTitle className='text-sm'>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        {description && <p className='text-xs mb-3'>{description}</p>}
-
         <div className='space-y-3'>
           {impacts.length > 0 ? (
             ['Direct', 'Indirect', 'Hidden'].map((relationType) => {
-              const relatedImpacts = impacts.filter(
-                (impact) => impact.relation_type === relationType,
-              );
+              const relatedImpacts = impacts.filter((impact) => impact.relation === relationType);
               if (relatedImpacts.length === 0) return null;
 
               return (
@@ -43,8 +55,7 @@ export function CanvasSection({
                         key={impact.id}
                         className='text-xs'>
                         <span>
-                          {impact.impact_level} {impact.dimension.toLowerCase()} -{' '}
-                          {impact.description}
+                          {impact.score} {impact.dimension.toLowerCase()} - {impact.title}
                         </span>
                       </div>
                     ))}

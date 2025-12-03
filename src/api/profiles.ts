@@ -1,5 +1,5 @@
 // --- Profiles & Collaborators API functions ---
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || '';
 // Endpoints:
 // - GetProfileById:         [GET]    /api/profiles/{id}
 // - UpdateProfile:          [PUT]    /api/profiles/{id}
@@ -11,12 +11,12 @@ const API_URL = import.meta.env.VITE_API_URL;
 // TanStack Query hooks:
 // - useProfile, useUpdateProfile, useProjectCollaborators, useAddCollaborator, useUpdateCollaboratorRole, useRemoveCollaborator
 
-const token = localStorage.getItem('jwt') || '';
+const getToken = () => localStorage.getItem('jwt') || '';
 
 export async function getProfile(userId: string) {
-    const res = await fetch(`${API_URL}/profiles/${userId}`, {
+    const res = await fetch(`${API_URL}/api/profiles/${userId}`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
         },
     });
     if (!res.ok) throw new Error('Failed to fetch profile');
@@ -24,11 +24,11 @@ export async function getProfile(userId: string) {
 }
 
 export async function updateProfile(userId: string, updates: { name?: string; picture_url?: string }) {
-    const res = await fetch(`${API_URL}/profiles/${userId}`, {
+    const res = await fetch(`${API_URL}/api/profiles/${userId}`, {
         method: 'PUT',
         headers: { 
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify(updates),
     });
@@ -37,43 +37,33 @@ export async function updateProfile(userId: string, updates: { name?: string; pi
 }
 
 export async function getProjectCollaborators(projectId: string) {
-    const res = await fetch(`${API_URL}/projects/${projectId}/collaborators`, {
+    const res = await fetch(`${API_URL}/api/projects/${projectId}/collaborators`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
         },
     });
     if (!res.ok) throw new Error('Failed to fetch collaborators');
     return res.json();
 }
 
-export async function addCollaborator(projectId: string, userId: string, role: 'owner' | 'editor' | 'viewer') {
-    const res = await fetch(`${API_URL}/projects/${projectId}/collaborators`, {
+export async function addCollaborator(projectId: string, email: string) {
+    const res = await fetch(`${API_URL}/api/projects/${projectId}/collaborators`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify({ userId, role }),
+        body: JSON.stringify({ email }),
     });
     if (!res.ok) throw new Error('Failed to add collaborator');
     return res.json();
 }
 
-export async function updateCollaboratorRole(collaboratorId: string, role: 'owner' | 'editor' | 'viewer') {
-    const res = await fetch(`${API_URL}/collaborators/${collaboratorId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ role }),
-    });
-    if (!res.ok) throw new Error('Failed to update collaborator role');
-    return res.json();
-}
-
 export async function removeCollaborator(collaboratorId: string) {
-    const res = await fetch(`${API_URL}/collaborators/${collaboratorId}`, {
+    const res = await fetch(`${API_URL}/api/collaborators/${collaboratorId}`, {
         method: 'DELETE',
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
         },
     });
     if (!res.ok) throw new Error('Failed to remove collaborator');
@@ -100,25 +90,18 @@ export function useProjectCollaborators(projectId: string) {
 }
 
 export function useAddCollaborator() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ projectId, userId, role }: { projectId: string; userId: string; role: 'owner' | 'editor' | 'viewer' }) => addCollaborator(projectId, userId, role),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['projectCollaborators', variables.projectId] });
-        },
-    });
-}
+  const queryClient = useQueryClient();
 
-export function useUpdateCollaboratorRole() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ collaboratorId, role }: { collaboratorId: string; role: 'owner' | 'editor' | 'viewer' }) => updateCollaboratorRole(collaboratorId, role),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['projectCollaborators'] });
-        },
-    });
+  return useMutation({
+    mutationFn: ({ projectId, email }: { projectId: string; email: string }) =>
+      addCollaborator(projectId, email),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projectCollaborators', variables.projectId],
+      });
+    },
+  });
 }
-
 export function useRemoveCollaborator() {
     const queryClient = useQueryClient();
     return useMutation({
