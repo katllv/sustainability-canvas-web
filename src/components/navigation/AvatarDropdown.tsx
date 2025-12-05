@@ -1,4 +1,4 @@
-import { User, Settings, LogOut } from 'lucide-react';
+import { User, Settings, LogOut, Shield } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +19,14 @@ interface AvatarDropdownProps {
 }
 
 export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const router = useRouter();
+  
+  console.log('AvatarDropdown - user:', user);
+  console.log('AvatarDropdown - user.role:', user?.role);
+  console.log('AvatarDropdown - isAdmin:', user?.role === 1);
+  
+  const isAdmin = user?.role === 1;
 
   const handleLogout = async () => {
     try {
@@ -58,7 +64,7 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
           </div>
         </DropdownMenuLabel>
         {/* missing dropdown items */}
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.navigate({ to: '/profile' })}>
           <User className='mr-2 inline-block size-4 text-the-dark-blue' />
           Profile
         </DropdownMenuItem>
@@ -66,6 +72,15 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
           <Settings className='mr-2 inline-block size-4 text-the-dark-blue' />
           Account settings
         </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => router.navigate({ to: '/admin' })}>
+              <Shield className='mr-2 inline-block size-4 text-the-dark-blue' />
+              Admin Dashboard
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className='mr-2 size-4 text-the-dark-blue' />

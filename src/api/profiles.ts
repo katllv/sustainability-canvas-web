@@ -20,19 +20,61 @@ export async function getProfile(userId: string) {
         },
     });
     if (!res.ok) throw new Error('Failed to fetch profile');
-    return res.json();
+    const data = await res.json();
+    console.log('Profile data from API:', data);
+    // Map backend PascalCase to frontend snake_case
+    return {
+        ...data,
+        picture_url: data.ProfileUrl || data.profileUrl || data.picture_url,
+        name: data.Name || data.name,
+        email: data.Email || data.email,
+        jobTitle: data.JobTitle || data.jobTitle,
+        department: data.Department || data.department,
+        organization: data.Organization || data.organization,
+        location: data.Location || data.location,
+    };
 }
 
-export async function updateProfile(userId: string, updates: { name?: string; picture_url?: string }) {
+export async function updateProfile(userId: string, updates: { name?: string; picture_url?: string; jobTitle?: string; department?: string; organization?: string; location?: string }) {
+    // Map frontend format to backend camelCase (what backend expects with JsonNamingPolicy.CamelCase)
+    const backendUpdates: Record<string, unknown> = {};
+    if (updates.name !== undefined) backendUpdates.name = updates.name;
+    if (updates.picture_url !== undefined) backendUpdates.profileUrl = updates.picture_url;
+    if (updates.jobTitle !== undefined) backendUpdates.jobTitle = updates.jobTitle;
+    if (updates.department !== undefined) backendUpdates.department = updates.department;
+    if (updates.organization !== undefined) backendUpdates.organization = updates.organization;
+    if (updates.location !== undefined) backendUpdates.location = updates.location;
+    
+    console.log('Sending profile updates:', JSON.stringify(backendUpdates, null, 2));
+    
     const res = await fetch(`${API_URL}/api/profiles/${userId}`, {
         method: 'PUT',
         headers: { 
             'Content-Type': 'application/json',
             Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(backendUpdates),
     });
-    if (!res.ok) throw new Error('Failed to update profile');
+    if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Update profile failed:', errorText);
+        throw new Error('Failed to update profile');
+    }
+    const data = await res.json();
+    console.log('Updated profile response:', data);
+    return data;
+}
+
+export async function uploadProfilePicture(userId: string, imageData: string) {
+    const res = await fetch(`${API_URL}/api/profiles/${userId}/picture`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ imageData }),
+    });
+    if (!res.ok) throw new Error('Failed to upload profile picture');
     return res.json();
 }
 
@@ -72,12 +114,43 @@ export async function removeCollaborator(collaboratorId: string) {
 
 // --- TanStack Query hooks ---
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/lib/auth';
 
 export function useProfile(userId: string) {
     return useQuery({
         queryKey: ['profile', userId],
         queryFn: () => getProfile(userId),
         enabled: !!userId,
+    });
+}
+
+export function useUpdateProfile() {
+    const queryClient = useQueryClient();
+    const { refetchProfile } = useAuth();
+    
+    return useMutation({
+        mutationFn: ({ userId, updates }: { userId: string; updates: { name?: string; picture_url?: string; jobTitle?: string; department?: string; organization?: string; location?: string } }) =>
+            updateProfile(userId, updates),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['profile', variables.userId] });
+            // Also update auth context so header updates
+            refetchProfile();
+        },
+    });
+}
+
+export function useUploadProfilePicture() {
+    const queryClient = useQueryClient();
+    const { refetchProfile } = useAuth();
+    
+    return useMutation({
+        mutationFn: ({ userId, imageData }: { userId: string; imageData: string }) =>
+            uploadProfilePicture(userId, imageData),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['profile', variables.userId] });
+            // Also update auth context so header and profile page update
+            refetchProfile();
+        },
     });
 }
 

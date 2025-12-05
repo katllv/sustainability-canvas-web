@@ -1,5 +1,5 @@
 import { SustainabilityCanvas } from '@/components/canvas';
-import { Download, Pencil, Printer, Upload } from 'lucide-react';
+import { Download, Pencil, Printer } from 'lucide-react';
 import { useProject } from '@/api/projects';
 import { useParams, Navigate } from '@tanstack/react-router';
 

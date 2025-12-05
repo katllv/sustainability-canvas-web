@@ -124,6 +124,14 @@ static const Color backgroundColor = Color.fromRGBO(255,
     --the-yellow: oklch(0.9482 0.0809 94.6);
     --the-dark-blue: oklch(0.4254 0.1083 254.41);
     --the-light-grey: oklch(0.9727 0.0017 247.84);
+    
+    /* Admin Dashboard colors */
+    --admin-blue: #C1E3FF;
+    --admin-purple: #EBCEF3;
+    --admin-red-bg: #FEF2F2;
+    --admin-red-button: #D4183D;
+    --admin-red-stroke: #FFA2A2;
+    --admin-grey-stroke: #D9D9D9;
 
     /* Colors */
     --color-background: oklch(1 0 0);
@@ -218,6 +226,13 @@ static const Color backgroundColor = Color.fromRGBO(255,
     --color-the-yellow: var(--the-yellow);
     --color-the-dark-blue: var(--the-dark-blue);
     --color-the-light-grey: var(--the-light-grey);
+    
+    /* Admin Dashboard colors */
+    --color-admin-blue: var(--admin-blue);
+    --color-admin-purple: var(--admin-purple);
+    --color-admin-red-bg: var(--admin-red-bg);
+    --color-admin-red-button: var(--admin-red-button);
+    --color-admin-red-stroke: var(--admin-red-stroke);
 }
 
 /* ---break---

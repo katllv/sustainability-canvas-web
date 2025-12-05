@@ -15,6 +15,17 @@ import { jwtDecode } from 'jwt-decode';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+interface JwtPayload {
+  userId?: string;
+  sub?: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  role: number;
+}
+
 interface Profile {
   id: string;
   name: string | null;
@@ -30,17 +41,20 @@ interface RegisterInput {
 }
 
 interface AuthContextType {
+  user: User | null;
   profile: Profile | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   register: (input: RegisterInput) => Promise<boolean>;
   signOut: () => void;
   token: string | null;
+  refetchProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
@@ -51,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (token) {
       setToken(token);
       try {
-        const decoded: any = jwtDecode(token);
+        const decoded = jwtDecode<JwtPayload>(token);
         const userId = decoded?.userId || decoded?.sub;
         if (userId) {
           // Try to fetch profile from API
@@ -70,20 +84,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
               return null;
             })
-            .then((profile) => {
-              if (profile) {
+            .then((data) => {
+              if (data) {
+                console.log('Profile from auth init:', data);
+                const roleValue = data.role ?? data.Role;
+                const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
+                
+                setUser({
+                  id: userId,
+                  email: data.email || data.Email || '',
+                  role: role,
+                });
                 setProfile({
-                  id: String(profile.id || profile.Id),
-                  name: profile.name || profile.Name || null,
-                  picture_url: null,
-                  email: profile.email || profile.Email || null,
+                  id: String(data.id || data.Id),
+                  name: data.name || data.Name || null,
+                  picture_url: data.ProfileUrl || data.profileUrl || data.picture_url || null,
+                  email: data.email || data.Email || null,
                 });
               } else {
+                setUser(null);
                 setProfile(null);
               }
               setLoading(false);
             })
             .catch(() => {
+              setUser(null);
               setProfile(null);
               setLoading(false);
             });
@@ -98,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Set profile and token from login/register response
-  const setAuthFromResponse = (data: any): boolean => {
+  const setAuthFromResponse = (data: { token?: string; user?: Record<string, unknown>; profile?: Record<string, unknown> }): boolean => {
     // data is expected something like:
     // { message, token, user: { Id, Username, Role, Profile: { Id, Name, Email } } }
     if (!data?.token) {
@@ -112,21 +137,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('jwt', data.token);
 
     // Try a few shapes – adjust if you know your exact API shape
-    const rawProfile =
-      data.user?.Profile || // original expected shape
+    const rawProfile = (
+      (data.user as Record<string, unknown>)?.Profile || // original expected shape
       data.profile || // maybe backend returns { profile: ... }
-      data.user; // fallback to user object itself
+      data.user // fallback to user object itself
+    ) as Record<string, unknown> | undefined;
 
     if (!rawProfile) {
       setProfile(null);
       return false;
     }
 
+    console.log('Setting profile from auth response:', rawProfile);
+    
+    // Set user data (from user object)
+    const userData = data.user as Record<string, unknown>;
+    const roleValue = userData.Role ?? userData.role;
+    const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
+    
+    setUser({
+      id: String(userData.Id ?? userData.id ?? ''),
+      email: String(userData.Email ?? userData.email ?? ''),
+      role: role,
+    });
+    
+    // Set profile data (from profile object)
     setProfile({
       id: String(rawProfile.id ?? rawProfile.Id ?? ''),
-      name: rawProfile.name ?? rawProfile.Name ?? null,
-      picture_url: null,
-      email: rawProfile.email ?? rawProfile.Email ?? null,
+      name: (rawProfile.name ?? rawProfile.Name ?? null) as string | null,
+      picture_url: (rawProfile.ProfileUrl ?? rawProfile.profileUrl ?? rawProfile.picture_url ?? null) as string | null,
+      email: (rawProfile.email ?? rawProfile.Email ?? null) as string | null,
     });
 
     return true;
@@ -182,13 +222,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Sign out: remove JWT and clear state
   const signOut = () => {
+    setUser(null);
     setProfile(null);
     setToken(null);
     localStorage.removeItem('jwt');
   };
 
+  // Refetch profile from API
+  const refetchProfile = async () => {
+    const currentToken = localStorage.getItem('jwt');
+    if (!currentToken || !profile?.id) return;
+
+    try {
+      const url = `${API_URL}/api/profiles/${profile.id}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${currentToken}`,
+        },
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Refetched profile:', data);
+        const roleValue = data.role ?? data.Role;
+        const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
+        
+        setUser({
+          id: profile.id,
+          email: data.email || data.Email || '',
+          role: role,
+        });
+        setProfile({
+          id: String(data.id || data.Id),
+          name: data.name || data.Name || null,
+          picture_url: data.ProfileUrl || data.profileUrl || data.picture_url || null,
+          email: data.email || data.Email || null,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to refetch profile:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ profile, loading, login, register, signOut, token }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, register, signOut, token, refetchProfile }}>
       {children}
     </AuthContext.Provider>
   );

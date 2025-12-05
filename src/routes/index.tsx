@@ -10,6 +10,8 @@ import {
   projectRoute,
   projectAnalysisRoute,
 } from './project-routes';
+import { profileRoute } from './profile-route';
+import { adminRoute } from './admin-route';
 import { loginRoute } from './login';
 import { signupRoute } from './signup';
 import { appLayoutRoute } from './app-layout-route';
@@ -20,6 +22,8 @@ const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([
     indexRoute,
     projectsRoute, // this is /projects
+    profileRoute, // this is /profile
+    adminRoute, // this is /admin
     projectRoute.addChildren([
       // this is /projects/$projectId
       projectOverviewRoute, // index route
