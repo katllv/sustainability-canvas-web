@@ -61,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   id: String(data.id || data.Id),
                   name: data.name || data.Name || null,
                   picture_url: data.ProfileUrl || data.profileUrl || data.picture_url || null,
-                  email: data.email || data.Email || null,
                 });
               } else {
                 setUser(null);
@@ -126,7 +125,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: String(rawProfile.id ?? rawProfile.Id ?? ''),
       name: (rawProfile.name ?? rawProfile.Name ?? null) as string | null,
       picture_url: (rawProfile.ProfileUrl ?? rawProfile.profileUrl ?? rawProfile.picture_url ?? null) as string | null,
-      email: (rawProfile.email ?? rawProfile.Email ?? null) as string | null,
     });
 
     return true;
@@ -215,7 +213,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: String(data.id || data.Id),
           name: data.name || data.Name || null,
           picture_url: data.ProfileUrl || data.profileUrl || data.picture_url || null,
-          email: data.email || data.Email || null,
         });
       }
     } catch (error) {

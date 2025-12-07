@@ -9,7 +9,7 @@ import DeleteAccountDialog from '@/components/settings/DeleteAccountDialog';
 import { useNavigate } from '@tanstack/react-router';
 
 export default function AccountSettingPage() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const [changeEmailOpen, setChangeEmailOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
@@ -29,59 +29,70 @@ export default function AccountSettingPage() {
       .slice(0, 2);
   };
 
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-6 max-w-5xl">
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Debug: log user data
+  console.log('User data:', user);
+  console.log('Profile data:', profile);
+
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <Card className="bg-white">
-        <CardHeader className="border-b px-[100px]">
-          <CardTitle className="text-2xl">Account settings</CardTitle>
+    <div className="container mx-auto py-8 px-6 max-w-5xl">
+      <Card className="bg-white shadow-sm">
+        <CardHeader className="border-b bg-white px-20 py-6">
+          <CardTitle className="text-2xl font-semibold text-the-dark-blue">Account settings</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6 px-[100px]">
+        <CardContent className="px-20 py-8 space-y-8">
           {/* Profile Information */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 mb-4">Profile Information</h3>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-14 w-14">
-                  <AvatarImage src={profile?.picture_url || undefined} />
-                  <AvatarFallback className="bg-the-dark-blue text-white text-lg">
-                    {getInitials(profile?.name || user?.email || '')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium text-gray-900">{profile?.name || 'No name set'}</p>
-                  <p className="text-sm text-gray-500">{user?.email}</p>
-                </div>
+          <div>
+            <h3 className="mb-4">Profile Information</h3>
+            <div className="flex items-center gap-4 pl-6 bg-gray-50 px-4 py-3 rounded-md border border-gray-200">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={profile?.picture_url || undefined} />
+                <AvatarFallback className="bg-the-dark-blue text-white text-lg">
+                  {getInitials(profile?.name || user?.email || 'Test')}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-gray-900 text-base">{profile?.name || 'Admin'}</p>
+                <p className="text-sm text-gray-500">{user?.email}</p>
               </div>
             </div>
           </div>
 
           {/* Email Address */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 mb-3">Email Address</h3>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-900">{user?.email}</span>
+          <div>
+            <h3 className="mb-4">Email Address</h3>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 bg-gray-50 px-4 py-2 rounded-md border border-gray-200">
+                <div className="text-sm text-gray-700">{user?.email}</div>
               </div>
-              <div className="flex justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setChangeEmailOpen(true)}
-                  className="border-the-dark-blue text-the-dark-blue hover:bg-the-dark-blue hover:text-white"
-                >
-                  Change Email
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                onClick={() => setChangeEmailOpen(true)}
+                className="border-the-dark-blue text-the-dark-blue hover:bg-the-dark-blue hover:text-white"
+              >
+                Change Email
+              </Button>
             </div>
           </div>
 
-          <div className="h-px w-full bg-neutral-300 my-8" />
+          <div className="h-px w-full bg-gray-300" />
 
           {/* Log Out */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-900 mb-1">Log Out</h3>
-            <div className="bg-gray-50 p-4 rounded-md flex items-center justify-between">
-              <span className="text-gray-500 text-sm">Sign out of your account</span>
-              <Button
+          <div>
+            <h3 className="mb-2">Log out</h3>
+            <div className="">
+              <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-md border border-gray-200">
+                <div className="text-gray-600 text-sm">Sign out of your account</div>
+                <Button
                 variant="outline"
                 onClick={handleLogout}
                 className="border-gray-300 text-gray-700 hover:bg-gray-100"
@@ -89,24 +100,27 @@ export default function AccountSettingPage() {
                 <LogOut className="h-4 w-4 mr-2" />
                 Log Out
               </Button>
+              </div>
             </div>
           </div>
 
           {/* Delete Account */}
           <div>
-            <h3 className="text-sm font-medium text-red-600 mb-1">Delete Account</h3>
-            <div className="flex items-center justify-between bg-red-50 p-4 rounded-md border border-red-200">
-              <span className="text-red-600 text-sm">
-                Permanently delete your account and all data
-              </span>
-              <Button
-                variant="outline"
-                onClick={() => setDeleteAccountOpen(true)}
-                className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Account
-              </Button>
+            <h3 className="mb-2">Delete Account</h3>
+            <div className="">
+              <div className="flex items-center justify-between bg-red-50 px-4 py-3 rounded-md border border-red-200">
+                <div className="text-red-600 text-sm">
+                  Permanently delete your account and all data
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteAccountOpen(true)}
+                  className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Account
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

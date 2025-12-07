@@ -39,7 +39,10 @@ code {
     }
 
     h3 {
-        font-size: var(--text-base);
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5rem;
         color: var(--color-text-grey);
     }
 }
@@ -56,8 +59,11 @@ code {
     }
 
     h3 {
-        font-size: var(--text-xl);
-        color: var(--color-text-grey);
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+        color: var(--color-text-black);
     }
 }
 
@@ -143,6 +149,7 @@ static const Color backgroundColor = Color.fromRGBO(255,
     --color-medium-grey: oklch(0.94 0.007 258.2);
     --color-light-grey: oklch(0.94 0.007 258.2);
     --color-text-grey: oklch(0.6401 0 0);
+    --color-text-black: #101828;
     --border: oklch(0.922 0 0);
     --input-bg: oklch(0.9587 0.0027 286.35);
     --popover: oklch(1 0 0);

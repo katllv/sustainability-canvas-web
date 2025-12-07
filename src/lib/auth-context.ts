@@ -15,7 +15,6 @@ export interface Profile {
   id: string;
   name: string | null;
   picture_url: string | null;
-  email: string | null;
 }
 
 export interface RegisterInput {
