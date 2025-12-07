@@ -6,15 +6,15 @@ import { useAuth } from '@/lib/useAuth';
 
 export default function Header() {
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
 
   //get project id from pathname
   const pathSegments = location.pathname.split('/');
   const projectId = pathSegments[2]; //get id from /project/{id}/...
 
   const userData = {
-    name: profile?.name || profile?.email?.split('@')[0] || 'User',
-    email: profile?.email || '',
+    name: profile?.name || user?.email?.split('@')[0] || 'User',
+    email: user?.email || '',
     avatarUrl: profile?.picture_url || '',
   };
 
