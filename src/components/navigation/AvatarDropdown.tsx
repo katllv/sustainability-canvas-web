@@ -64,13 +64,12 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
           <User className='mr-2 inline-block size-4 text-the-dark-blue' />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.navigate({ to: '/account-settings' })}>
           <Settings className='mr-2 inline-block size-4 text-the-dark-blue' />
           Account settings
         </DropdownMenuItem>
         {isAdmin && (
           <>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.navigate({ to: '/admin' })}>
               <Shield className='mr-2 inline-block size-4 text-the-dark-blue' />
               Admin Dashboard

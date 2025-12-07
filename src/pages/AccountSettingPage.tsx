@@ -31,50 +31,56 @@ export default function AccountSettingPage() {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold text-the-dark-blue mb-6">Account settings</h1>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl text-[#1B4965]">Account settings</CardTitle>
+      <Card className="bg-white">
+        <CardHeader className="border-b px-[100px]">
+          <CardTitle className="text-2xl">Account settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="pt-6 px-[100px]">
           {/* Profile Information */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-4">Profile Information</h3>
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={profile?.picture_url || undefined} />
-                <AvatarFallback className="bg-the-dark-blue text-white text-lg">
-                  {getInitials(profile?.name || user?.email || '')}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold text-gray-900">{profile?.name || 'No name set'}</p>
-                <p className="text-sm text-gray-600">{user?.email}</p>
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-gray-500 mb-4">Profile Information</h3>
+            <div className="bg-gray-50 p-4 rounded-md">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-14 w-14">
+                  <AvatarImage src={profile?.picture_url || undefined} />
+                  <AvatarFallback className="bg-the-dark-blue text-white text-lg">
+                    {getInitials(profile?.name || user?.email || '')}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium text-gray-900">{profile?.name || 'No name set'}</p>
+                  <p className="text-sm text-gray-500">{user?.email}</p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Email Address */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Email Address</h3>
-            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-md">
-              <span className="text-gray-700">{user?.email}</span>
-              <Button
-                variant="outline"
-                onClick={() => setChangeEmailOpen(true)}
-                className="border-the-dark-blue text-the-dark-blue hover:bg-the-dark-blue hover:text-white"
-              >
-                Change Email
-              </Button>
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-gray-500 mb-3">Email Address</h3>
+            <div className="bg-gray-50 p-4 rounded-md">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-gray-900">{user?.email}</span>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setChangeEmailOpen(true)}
+                  className="border-the-dark-blue text-the-dark-blue hover:bg-the-dark-blue hover:text-white"
+                >
+                  Change Email
+                </Button>
+              </div>
             </div>
           </div>
 
+          <div className="h-px w-full bg-neutral-300 my-8" />
+
           {/* Log Out */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Log Out</h3>
-            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-md">
-              <span className="text-gray-600 text-sm">Sign out of your account</span>
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-gray-900 mb-1">Log Out</h3>
+            <div className="bg-gray-50 p-4 rounded-md flex items-center justify-between">
+              <span className="text-gray-500 text-sm">Sign out of your account</span>
               <Button
                 variant="outline"
                 onClick={handleLogout}
@@ -88,7 +94,7 @@ export default function AccountSettingPage() {
 
           {/* Delete Account */}
           <div>
-            <h3 className="text-sm font-medium text-red-600 mb-2">Delete Account</h3>
+            <h3 className="text-sm font-medium text-red-600 mb-1">Delete Account</h3>
             <div className="flex items-center justify-between bg-red-50 p-4 rounded-md border border-red-200">
               <span className="text-red-600 text-sm">
                 Permanently delete your account and all data

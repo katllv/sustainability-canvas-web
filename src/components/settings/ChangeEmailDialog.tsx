@@ -21,7 +21,7 @@ interface ChangeEmailDialogProps {
 export default function ChangeEmailDialog({
   open,
   onOpenChange,
-  currentEmail: _currentEmail,
+  currentEmail,
 }: ChangeEmailDialogProps) {
   const [newEmail, setNewEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,12 +37,32 @@ export default function ChangeEmailDialog({
 
     setLoading(true);
     try {
-      // TODO: Implement API call to update email
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock API call
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('jwt');
+      
+      const response = await fetch(`${API_URL}/api/users/update-email`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          newEmail,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update email');
+      }
+
       toast.success('Email updated successfully');
       onOpenChange(false);
       setNewEmail('');
       setPassword('');
+      
+      // Reload the page to refresh user data
+      window.location.reload();
     } catch (error) {
       toast.error('Failed to update email');
     } finally {
@@ -74,7 +94,7 @@ export default function ChangeEmailDialog({
             <Input
               id="new-email"
               type="email"
-              placeholder="new.email@company.com"
+              placeholder={currentEmail}
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               required

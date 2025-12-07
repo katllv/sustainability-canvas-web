@@ -16,6 +16,7 @@ import { loginRoute } from './login';
 import { signupRoute } from './signup';
 import { appLayoutRoute } from './app-layout-route';
 import { publicLayoutRoute } from './public-layout-route';
+import { accountSettingsRoute } from './account-settings-route';
 
 const routeTree = rootRoute.addChildren([
   publicLayoutRoute.addChildren([loginRoute, signupRoute]),
@@ -24,6 +25,7 @@ const routeTree = rootRoute.addChildren([
     projectsRoute, // this is /projects
     profileRoute, // this is /profile
     adminRoute, // this is /admin
+    accountSettingsRoute, // this is /account-settings
     projectRoute.addChildren([
       // this is /projects/$projectId
       projectOverviewRoute, // index route
