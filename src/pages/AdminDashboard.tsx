@@ -5,6 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 
+interface UserWithProfile {
+  id: string;
+  email: string;
+  role: number;
+  profile?: {
+    name: string | null;
+  };
+}
+
 export default function AdminDashboard() {
   const { data: users, isLoading } = useAllUsers();
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +52,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y bg-white">
-                {users?.map((user: any) => (
+                {users?.map((user: UserWithProfile) => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm">{user.profile?.name || 'N/A'}</td>
                     <td className="px-4 py-3 text-sm">{user.email}</td>

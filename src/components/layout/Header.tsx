@@ -2,7 +2,7 @@ import { useLocation, Link } from '@tanstack/react-router';
 import { AvatarDropdown } from '../navigation/AvatarDropdown';
 import { AddProjectDialog } from '../projects/AddProjectDialog';
 import { ProjectTabs } from '../navigation/ProjectTabs';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 
 export default function Header() {
   const location = useLocation();

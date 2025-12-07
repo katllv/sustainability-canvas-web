@@ -1,7 +1,7 @@
 import { Route, Navigate } from '@tanstack/react-router';
 import { rootRoute } from './root-route';
 import Root from '../pages/RootLayout';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 
 function AppLayout() {
   const { profile, loading } = useAuth();

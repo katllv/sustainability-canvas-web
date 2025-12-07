@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Calendar, Users } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 import { getProjectsByProfileId } from '@/api/projects';
 import { useEffect, useState } from 'react';
 

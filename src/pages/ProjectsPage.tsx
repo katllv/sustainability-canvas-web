@@ -1,4 +1,4 @@
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 import { useUserProjectsFull } from '@/api/projects';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { EmptyProjectsState } from '@/components/projects/EmptyProjectsState';

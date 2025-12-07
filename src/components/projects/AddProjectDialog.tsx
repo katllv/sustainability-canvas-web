@@ -1,4 +1,4 @@
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 import { useCreateProject } from '@/api/projects';
 import { useAddCollaborator } from '@/api/profiles';
 import { useRouter } from '@tanstack/react-router';

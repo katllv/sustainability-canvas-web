@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 import { toast } from 'sonner';
 import { useRouter } from '@tanstack/react-router';
 
@@ -28,6 +28,7 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
       await signOut();
       toast.success('Logged out successfully');
       router.navigate({ to: '/login', replace: true });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Error logging out');
     }

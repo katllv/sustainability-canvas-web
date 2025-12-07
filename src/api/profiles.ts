@@ -110,7 +110,7 @@ export async function removeCollaborator(collaboratorId: string) {
 
 // --- TanStack Query hooks ---
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 
 export function useProfile(userId: string) {
     return useQuery({

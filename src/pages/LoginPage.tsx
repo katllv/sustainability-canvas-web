@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useRouter } from '@tanstack/react-router';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';

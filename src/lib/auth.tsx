@@ -10,48 +10,11 @@
 //
 // Usage: Wrap your app in <AuthProvider> and use the useAuth() hook for access to user, session, profile, loading, and signOut.
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { AuthContext, type JwtPayload, type User, type Profile, type RegisterInput } from './auth-context';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
-
-interface JwtPayload {
-  userId?: string;
-  sub?: string;
-}
-
-interface User {
-  id: string;
-  email: string;
-  role: number;
-}
-
-interface Profile {
-  id: string;
-  name: string | null;
-  picture_url: string | null;
-  email: string | null;
-}
-
-interface RegisterInput {
-  password: string;
-  name: string;
-  email: string;
-  registrationCode: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  profile: Profile | null;
-  loading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
-  register: (input: RegisterInput) => Promise<boolean>;
-  signOut: () => void;
-  token: string | null;
-  refetchProfile: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -265,12 +228,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }
