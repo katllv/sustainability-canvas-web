@@ -21,11 +21,6 @@ interface AvatarDropdownProps {
 export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) {
   const { signOut, user } = useAuth();
   const router = useRouter();
-  
-  console.log('AvatarDropdown - user:', user);
-  console.log('AvatarDropdown - user.role:', user?.role);
-  console.log('AvatarDropdown - isAdmin:', user?.role === 1);
-  
   const isAdmin = user?.role === 1;
 
   const handleLogout = async () => {

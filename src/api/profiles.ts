@@ -21,7 +21,6 @@ export async function getProfile(userId: string) {
     });
     if (!res.ok) throw new Error('Failed to fetch profile');
     const data = await res.json();
-    console.log('Profile data from API:', data);
     // Map backend PascalCase to frontend snake_case
     return {
         ...data,
@@ -45,8 +44,6 @@ export async function updateProfile(userId: string, updates: { name?: string; pi
     if (updates.organization !== undefined) backendUpdates.organization = updates.organization;
     if (updates.location !== undefined) backendUpdates.location = updates.location;
     
-    console.log('Sending profile updates:', JSON.stringify(backendUpdates, null, 2));
-    
     const res = await fetch(`${API_URL}/api/profiles/${userId}`, {
         method: 'PUT',
         headers: { 
@@ -61,7 +58,6 @@ export async function updateProfile(userId: string, updates: { name?: string; pi
         throw new Error('Failed to update profile');
     }
     const data = await res.json();
-    console.log('Updated profile response:', data);
     return data;
 }
 

@@ -86,7 +86,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             })
             .then((data) => {
               if (data) {
-                console.log('Profile from auth init:', data);
                 const roleValue = data.role ?? data.Role;
                 const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
                 
@@ -148,8 +147,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    console.log('Setting profile from auth response:', rawProfile);
-    
     // Set user data (from user object)
     const userData = data.user as Record<string, unknown>;
     const roleValue = userData.Role ?? userData.role;
@@ -243,7 +240,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (res.ok) {
         const data = await res.json();
-        console.log('Refetched profile:', data);
         const roleValue = data.role ?? data.Role;
         const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
         
