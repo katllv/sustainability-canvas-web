@@ -1,6 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Download, Printer } from 'lucide-react';
-import { useParams } from '@tanstack/react-router';
 import {
   PieChart,
   Pie,
@@ -259,7 +258,7 @@ export default function AnalysisPage() {
                   <Bar
                     dataKey='count'
                     radius={[4, 4, 0, 0]}>
-                    {sdgBarData.map((entry, index) => (
+                    {sdgBarData.map((_entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={sdgColors[index % sdgColors.length]}

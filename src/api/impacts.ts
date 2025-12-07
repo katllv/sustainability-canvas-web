@@ -30,6 +30,7 @@ export interface Impact {
   description?: string
   createdAt?: string
   updatedAt?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   impactSdgs?: Array<any>
 }
 
@@ -90,13 +91,13 @@ export async function deleteImpact(id: number) {
     return res.json();
 }
 
-export async function linkImpactToSDG(impactId: string, sdgId: string) {
-// Implement this if/when you have an endpoint for linking impacts to SDGs
+export async function linkImpactToSDG(_impactId: string, _sdgId: string): Promise<void> {
+    // Implement this if/when you have an endpoint for linking impacts to SDGs
     throw new Error('Not implemented: linkImpactToSDG');
 }
 
-export async function unlinkImpactFromSDG(impactId: string, sdgId: string) {
-// Implement this if/when you have an endpoint for unlinking impacts from SDGs
+export async function unlinkImpactFromSDG(_impactId: string, _sdgId: string): Promise<void> {
+    // Implement this if/when you have an endpoint for unlinking impacts from SDGs
     throw new Error('Not implemented: unlinkImpactFromSDG');
 }
 
@@ -126,7 +127,7 @@ export function useUpdateImpact() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ id, updates }: { id: number; updates: Partial<Omit<Impact, 'Id' | 'ProjectId' | 'CreatedAt' | 'UpdatedAt'>> }) => updateImpact(id, updates),
-        onSuccess: (_data, variables) => {
+        onSuccess: () => {
             // Invalidate impacts for the relevant project
             queryClient.invalidateQueries({ queryKey: ['projectImpacts'] });
         },
@@ -137,7 +138,7 @@ export function useDeleteImpact() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: deleteImpact,
-        onSuccess: (_data, id) => {
+        onSuccess: (_data, _id) => {
             // Invalidate all project impacts queries
             queryClient.invalidateQueries({ queryKey: ['projectImpacts'] });
         },

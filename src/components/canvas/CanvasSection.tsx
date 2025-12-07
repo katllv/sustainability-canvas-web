@@ -12,7 +12,7 @@ interface CanvasSectionProps {
 
 export function CanvasSection({
   title,
-  description,
+  description: _description,
   className = '',
   backgroundColor = 'bg-card',
   impacts = [],
