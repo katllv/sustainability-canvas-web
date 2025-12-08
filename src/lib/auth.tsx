@@ -12,7 +12,13 @@
 
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { AuthContext, type JwtPayload, type User, type Profile, type RegisterInput } from './auth-context';
+import {
+  AuthContext,
+  type JwtPayload,
+  type User,
+  type Profile,
+  type RegisterInput,
+} from './auth-context';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -30,6 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const decoded = jwtDecode<JwtPayload>(token);
         const userId = decoded?.userId || decoded?.sub;
+        // Get email from JWT token
+        const emailFromToken = (decoded as any)?.email || (decoded as any)?.Email || '';
+
         if (userId) {
           // Try to fetch profile from API
           const url = `${API_URL}/api/profiles/${userId}`;
@@ -50,17 +59,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .then((data) => {
               if (data) {
                 const roleValue = data.role ?? data.Role;
-                const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
-                
+                const role =
+                  roleValue === null || roleValue === undefined || isNaN(Number(roleValue))
+                    ? 0
+                    : Number(roleValue);
+
                 setUser({
                   id: userId,
-                  email: data.email || data.Email || '',
+                  email: data.email || data.Email || emailFromToken,
                   role: role,
                 });
                 setProfile({
                   id: String(data.id || data.Id),
                   name: data.name || data.Name || null,
-                  picture_url: data.ProfileUrl || data.profileUrl || data.picture_url || null,
+                  profileUrl: data.profileUrl || data.ProfileUrl || null,
                 });
               } else {
                 setUser(null);
@@ -84,7 +96,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Set profile and token from login/register response
-  const setAuthFromResponse = (data: { token?: string; user?: Record<string, unknown>; profile?: Record<string, unknown> }): boolean => {
+  const setAuthFromResponse = (data: {
+    token?: string;
+    user?: Record<string, unknown>;
+    profile?: Record<string, unknown>;
+  }): boolean => {
     // data is expected something like:
     // { message, token, user: { Id, Username, Role, Profile: { Id, Name, Email } } }
     if (!data?.token) {
@@ -98,11 +114,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('jwt', data.token);
 
     // Try a few shapes – adjust if you know your exact API shape
-    const rawProfile = (
-      (data.user as Record<string, unknown>)?.Profile || // original expected shape
+    const rawProfile = ((data.user as Record<string, unknown>)?.Profile || // original expected shape
       data.profile || // maybe backend returns { profile: ... }
-      data.user // fallback to user object itself
-    ) as Record<string, unknown> | undefined;
+      data.user) as Record<string, unknown> | undefined; // fallback to user object itself
 
     if (!rawProfile) {
       setProfile(null);
@@ -112,19 +126,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set user data (from user object)
     const userData = data.user as Record<string, unknown>;
     const roleValue = userData.Role ?? userData.role;
-    const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
-    
+    const role =
+      roleValue === null || roleValue === undefined || isNaN(Number(roleValue))
+        ? 0
+        : Number(roleValue);
+
     setUser({
       id: String(userData.Id ?? userData.id ?? ''),
       email: String(userData.Email ?? userData.email ?? ''),
       role: role,
     });
-    
+
     // Set profile data (from profile object)
     setProfile({
       id: String(rawProfile.id ?? rawProfile.Id ?? ''),
       name: (rawProfile.name ?? rawProfile.Name ?? null) as string | null,
-      picture_url: (rawProfile.ProfileUrl ?? rawProfile.profileUrl ?? rawProfile.picture_url ?? null) as string | null,
+      profileUrl: (rawProfile.profileUrl ?? rawProfile.ProfileUrl ?? null) as string | null,
     });
 
     return true;
@@ -198,12 +215,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           Authorization: `Bearer ${currentToken}`,
         },
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         const roleValue = data.role ?? data.Role;
-        const role = (roleValue === null || roleValue === undefined || isNaN(Number(roleValue))) ? 0 : Number(roleValue);
-        
+        const role =
+          roleValue === null || roleValue === undefined || isNaN(Number(roleValue))
+            ? 0
+            : Number(roleValue);
+
         setUser({
           id: profile.id,
           email: data.email || data.Email || '',
@@ -212,7 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile({
           id: String(data.id || data.Id),
           name: data.name || data.Name || null,
-          picture_url: data.ProfileUrl || data.profileUrl || data.picture_url || null,
+          profileUrl: data.profileUrl || data.ProfileUrl || null,
         });
       }
     } catch (error) {
@@ -221,7 +241,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, register, signOut, token, refetchProfile }}>
+    <AuthContext.Provider
+      value={{ user, profile, loading, login, register, signOut, token, refetchProfile }}>
       {children}
     </AuthContext.Provider>
   );

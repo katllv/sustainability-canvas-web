@@ -14,7 +14,7 @@ export interface User {
 export interface Profile {
   id: string;
   name: string | null;
-  picture_url: string | null;
+  profileUrl: string | null;
 }
 
 export interface RegisterInput {
