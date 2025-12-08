@@ -28,7 +28,7 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
       await signOut();
       toast.success('Logged out successfully');
       router.navigate({ to: '/login', replace: true });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Error logging out');
     }
@@ -38,7 +38,10 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
     <DropdownMenu>
       <DropdownMenuTrigger className='focus:outline-none'>
         <Avatar className='w-14 h-14'>
-          <AvatarImage src={avatarUrl} />
+          <AvatarImage
+            className='object-cover mx-auto'
+            src={avatarUrl}
+          />
           <AvatarFallback>
             <User />
           </AvatarFallback>
@@ -49,7 +52,10 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
         sideOffset={20}>
         <DropdownMenuLabel className='flex flex-row items-center gap-4 p-4'>
           <Avatar className='w-14 h-14'>
-            <AvatarImage src={avatarUrl} />
+            <AvatarImage
+              className='object-cover mx-auto'
+              src={avatarUrl}
+            />
             <AvatarFallback>
               <User />
             </AvatarFallback>

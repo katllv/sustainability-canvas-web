@@ -15,7 +15,7 @@ export default function Header() {
   const userData = {
     name: profile?.name || user?.email?.split('@')[0] || 'User',
     email: user?.email || '',
-    avatarUrl: profile?.picture_url || '',
+    avatarUrl: profile?.profileUrl || '',
   };
 
   //check if we're inside a specific project (not on projects overview)
