@@ -39,10 +39,6 @@ export default function AccountSettingPage() {
     );
   }
 
-  // Debug: log user data
-  console.log('User data:', user);
-  console.log('Profile data:', profile);
-
   return (
     <div className='container mx-auto py-8 px-6 max-w-5xl'>
       <Card className='bg-white shadow-sm'>
