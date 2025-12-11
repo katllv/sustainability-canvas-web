@@ -79,14 +79,15 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <span>Team Members</span>
             </div>
 
-            <div className='mt-3 flex flex-wrap items-center gap-2'>
+            <div className='mt-3 flex items-center'>
               {firstFew.map((c: Collaborator, idx: number) => {
                 const name = getCollaboratorName(c);
                 const initials = getCollaboratorInitials(name);
                 return (
                   <div
                     key={idx}
-                    className='flex h-8 w-8 items-center justify-center rounded-full bg-[#E2EBFF] text-xs font-semibold text-[#3451A4]'>
+                    className='flex h-8 w-8 items-center justify-center rounded-full bg-the-light-blue text-xs border-2 border-white'
+                    style={{ marginLeft: idx === 0 ? 0 : '-8px', zIndex: idx }}>
                     {initials}
                   </div>
                 );
