@@ -144,8 +144,17 @@ export function useUpdateProject() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: ({ id, updates }: { id: string; updates: { title?: string; description?: string } }) => updateProject(id, updates),
-		onSuccess: () => {
+		onSuccess: (data, variables) => {
+			// Update the specific project cache
+			queryClient.setQueryData(['project', variables.id], (old: Record<string, unknown> | undefined) => {
+				if (!old) return old;
+				return { ...old, ...variables.updates };
+			});
+			
+			// Invalidate project lists to refresh them
 			queryClient.invalidateQueries({ queryKey: ['projects'] });
+			queryClient.invalidateQueries({ queryKey: ['projectsByProfile'] });
+			queryClient.invalidateQueries({ queryKey: ['collaboratorProjects'] });
 		},
 	});
 }

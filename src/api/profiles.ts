@@ -80,6 +80,7 @@ export async function removeCollaborator(collaboratorId: string) {
         },
     });
     if (!res.ok) throw new Error('Failed to remove collaborator');
+    if (res.status === 204) return { success: true };
     return res.json();
 }
 
@@ -124,7 +125,7 @@ export function useUploadProfilePicture() {
             // Convert userId to string to match query key format
             const userIdStr = String(variables.userId);
             // Directly update the cache with the new data
-            queryClient.setQueryData(['profile', userIdStr], (old: any) => ({
+            queryClient.setQueryData(['profile', userIdStr], (old: Record<string, unknown> | undefined) => ({
                 ...old,
                 ...data,
             }));
@@ -146,10 +147,16 @@ export function useAddCollaborator() {
   return useMutation({
     mutationFn: ({ projectId, email }: { projectId: string; email: string }) =>
       addCollaborator(projectId, email),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['projectCollaborators', variables.projectId],
-      });
+    onSuccess: (newCollaborator, variables) => {
+      // Optimistically add the new collaborator to cache
+      queryClient.setQueryData(
+        ['projectCollaborators', variables.projectId],
+        (old: unknown[] | undefined) => {
+          if (!old) return [newCollaborator];
+          return [...old, newCollaborator];
+        }
+      );
+        queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 }
@@ -157,8 +164,16 @@ export function useRemoveCollaborator() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: removeCollaborator,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['projectCollaborators'] });
+        onSuccess: (_data, collaboratorId) => {
+            // Optimistically remove the collaborator from all project caches
+            queryClient.setQueriesData<Array<{ id: number }>>(
+                { queryKey: ['projectCollaborators'] },
+                (old) => {
+                    if (!old) return old;
+                    return old.filter((collab) => String(collab.id) !== collaboratorId);
+                }
+            );
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
         },
     });
 }

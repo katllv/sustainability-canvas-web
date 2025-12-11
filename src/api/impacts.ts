@@ -19,19 +19,26 @@ export type RelationType = 'Direct' | 'Indirect' | 'Hidden'
 export type Dimension = 'Environmental' | 'Social' | 'Economic'
 export type ImpactScore = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 
+export type SDGId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17
+
+export interface ImpactSDG {
+  sdgId?: number
+  id?: number
+}
+
 export interface Impact {
   id: number
   title: string
   projectId: number
-  type: SectionType
-  relation: RelationType
-  dimension: Dimension
-  score: ImpactScore
+  type: SectionType // UVP, CS, CR, CH, GO, KS, KA, WM, KTR, CO, RE
+  relation: RelationType // direct, indirect, hidden
+  dimension: Dimension // e, s, or ec
+  score: ImpactScore // 1-10
   description?: string
   createdAt?: string
   updatedAt?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  impactSdgs?: Array<any>
+  impactSdgs?: ImpactSDG[]
+  sdgIds?: SDGId[] // For sending to backend
 }
 
 export async function getProjectImpacts(projectId: string) {
@@ -54,7 +61,7 @@ export async function getImpactsBySection(projectId: string, sectionType: Sectio
     return res.json();
 }
 
-export async function createImpact(impact: Omit<Impact, 'id' | 'createdAt' | 'updatedAt' | 'impactSdgs'>) {
+export async function createImpact(impact: Omit<Impact, 'id' | 'createdAt' | 'updatedAt' | 'impactSdgs'>) {    
     const res = await fetch(`${API_URL}/api/impacts`, {
         method: 'POST',
         headers: { 
@@ -88,17 +95,9 @@ export async function deleteImpact(id: number) {
         },
     });
     if (!res.ok) throw new Error('Failed to delete impact');
+    // 204 No Content - no response body
+    if (res.status === 204) return { success: true };
     return res.json();
-}
-
-export async function linkImpactToSDG(_impactId: string, _sdgId: string): Promise<void> {
-    // Implement this if/when you have an endpoint for linking impacts to SDGs
-    throw new Error('Not implemented: linkImpactToSDG');
-}
-
-export async function unlinkImpactFromSDG(_impactId: string, _sdgId: string): Promise<void> {
-    // Implement this if/when you have an endpoint for unlinking impacts from SDGs
-    throw new Error('Not implemented: unlinkImpactFromSDG');
 }
 
 // --- TanStack Query hooks ---
@@ -116,9 +115,15 @@ export function useCreateImpact() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: createImpact,
-        onSuccess: (_data, variables) => {
-            // Invalidate impacts for the relevant project (convert number back to string to match query key)
-            queryClient.invalidateQueries({ queryKey: ['projectImpacts', String(variables.projectId)] });
+        onSuccess: (newImpact, variables) => {
+            // Optimistically add the new impact to cache
+            queryClient.setQueriesData<Impact[]>(
+                { queryKey: ['projectImpacts', String(variables.projectId)] },
+                (old) => {
+                    if (!old) return [newImpact];
+                    return [...old, newImpact];
+                }
+            );
         },
     });
 }
@@ -126,10 +131,18 @@ export function useCreateImpact() {
 export function useUpdateImpact() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, updates }: { id: number; updates: Partial<Omit<Impact, 'Id' | 'ProjectId' | 'CreatedAt' | 'UpdatedAt'>> }) => updateImpact(id, updates),
-        onSuccess: () => {
-            // Invalidate impacts for the relevant project
-            queryClient.invalidateQueries({ queryKey: ['projectImpacts'] });
+        mutationFn: ({ id, updates }: { id: number; updates: Partial<Omit<Impact, 'id' | 'projectId' | 'createdAt' | 'updatedAt' | 'impactSdgs'>> }) => updateImpact(id, updates),
+        onSuccess: (updatedImpact, { id }) => {
+            // Update the cache directly instead of invalidating
+            queryClient.setQueriesData<Impact[]>(
+                { queryKey: ['projectImpacts'] },
+                (old) => {
+                    if (!old) return old;
+                    return old.map((impact) => 
+                        impact.id === id ? { ...impact, ...updatedImpact } : impact
+                    );
+                }
+            );
         },
     });
 }
@@ -138,8 +151,31 @@ export function useDeleteImpact() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: deleteImpact,
-        onSuccess: (_data, _id) => {
-            // Invalidate all project impacts queries
+        onMutate: async (impactId) => {
+            // Cancel any outgoing refetches
+            await queryClient.cancelQueries({ queryKey: ['projectImpacts'] });
+            
+            // Snapshot the previous values
+            const previousImpacts = queryClient.getQueriesData({ queryKey: ['projectImpacts'] });
+            
+            // Optimistically update all projectImpacts queries
+            queryClient.setQueriesData<Impact[]>(
+                { queryKey: ['projectImpacts'] },
+                (old) => old?.filter((impact) => impact.id !== impactId) ?? []
+            );
+            
+            return { previousImpacts };
+        },
+        onError: (_err, _impactId, context) => {
+            // Rollback on error
+            if (context?.previousImpacts) {
+                context.previousImpacts.forEach(([queryKey, data]) => {
+                    queryClient.setQueryData(queryKey, data);
+                });
+            }
+        },
+        onSettled: () => {
+            // Always refetch to ensure data is in sync
             queryClient.invalidateQueries({ queryKey: ['projectImpacts'] });
         },
     });
