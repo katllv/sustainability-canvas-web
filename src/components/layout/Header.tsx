@@ -22,7 +22,7 @@ export default function Header() {
   const isInsideProject = location.pathname.startsWith('/projects/') && pathSegments[2];
 
   return (
-    <nav className='w-full bg-white'>
+    <nav className='w-full bg-white print:hidden'>
       <div className=' flex h-24 px-6'>
         <div className='flex flex-1 justify-between'>
           {isInsideProject ? <ProjectTabs projectId={projectId} /> : <div></div>}
