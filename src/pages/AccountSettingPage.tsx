@@ -41,7 +41,7 @@ export default function AccountSettingPage() {
 
   return (
     <div className='container mx-auto py-8 px-6 max-w-5xl'>
-      <Card className='bg-white shadow-sm'>
+      <Card className='bg-white'>
         <CardHeader className='border-b bg-white px-20 py-6'>
           <CardTitle className='text-2xl font-semibold text-the-dark-blue'>
             Account settings

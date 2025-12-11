@@ -5,7 +5,7 @@ import { indexRoute } from './index-route';
 import {
   projectsRoute,
   projectCanvasRoute,
-  projectCollaboratorsRoute,
+  projectTeamRoute,
   projectOverviewRoute,
   projectRoute,
   projectAnalysisRoute,
@@ -31,7 +31,7 @@ const routeTree = rootRoute.addChildren([
       projectOverviewRoute, // index route
       projectCanvasRoute, //projects/$projectId/canvas
       projectAnalysisRoute, //projects/$projectId/analysis
-      projectCollaboratorsRoute, //projects/$projectId/collaborators
+      projectTeamRoute, //projects/$projectId/team
     ]),
   ]),
 ]);
