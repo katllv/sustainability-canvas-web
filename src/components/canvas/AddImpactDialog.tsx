@@ -1,6 +1,4 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,37 +6,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { useCreateImpact } from '@/api/impacts';
-import type { SectionType, Impact } from '@/api/impacts';
-
-const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
-  relationType: z.enum(['Direct', 'Indirect', 'Hidden']),
-  dimension: z.enum(['Environmental', 'Social', 'Economic']),
-  score: z.number().min(1).max(10),
-  sdgs: z.string().optional(),
-});
+import { useCreateImpact, useDeleteImpact, useUpdateImpact } from '@/api/impacts';
+import type { SectionType, Impact, SDGId } from '@/api/impacts';
+import ImpactForm from './ImpactForm';
+import ImpactList from './ImpactList';
 
 type Props = {
   open: boolean;
@@ -57,46 +31,90 @@ export default function AddImpactDialog({
   sectionKey,
   existingImpacts,
   onCreated,
-  backgroundColor = 'bg-[#F5EAFE]', // soft purple like the mock
+  backgroundColor = '',
 }: Props) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      relationType: 'Direct',
-      dimension: 'Environmental',
-      score: 5,
-      sdgs: '',
-    },
-  });
+  const [showForm, setShowForm] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [relationType, setRelationType] = useState('Direct');
+  const [dimension, setDimension] = useState('Environmental');
+  const [sdgs, setSdgs] = useState<SDGId[]>([]);
+  const [score, setScore] = useState('');
+
+  const [savingId, setSavingId] = useState<number | undefined>();
+  const [deletingId, setDeletingId] = useState<number | undefined>();
+
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const createImpactMutation = useCreateImpact();
+  const updateImpactMutation = useUpdateImpact();
+  const deleteImpactMutation = useDeleteImpact();
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!projectId) {
-      toast.error('Missing project id');
+  useEffect(() => {
+    if (existingImpacts.length === 0) {
+      setShowForm(true);
+    }
+  }, [existingImpacts.length]);
+
+  useEffect(() => {
+    if (showForm && scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        setTimeout(() => {
+          viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [showForm]);
+
+  const handleAddEntry = () => {
+    setShowForm(true);
+  };
+
+  const handleSaveNewEntry = async () => {
+    if (!title.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+
+    if (!score) {
+      toast.error('Impact score is required');
       return;
     }
 
     try {
       const impact = await createImpactMutation.mutateAsync({
         projectId: parseInt(projectId),
-        title: values.title,
+        title,
         type: sectionKey,
-        relation: values.relationType,
-        dimension: values.dimension,
-        score: values.score as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10,
-        description: values.description,
+        relation: relationType as 'Direct' | 'Indirect' | 'Hidden',
+        dimension: dimension as 'Environmental' | 'Social' | 'Economic',
+        score: parseInt(score) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10,
+        description: description || undefined,
+        sdgIds: sdgs,
       });
 
       if (impact?.id) {
         toast.success('Impact added');
         onCreated?.(impact);
-        form.reset();
-      } else {
-        console.error('No id in response:', impact);
-        toast.error('Failed to add impact');
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setRelationType('Direct');
+        setDimension('Environmental');
+        setSdgs([]);
+        setScore('');
+        setShowForm(false);
+
+        // Scroll to bottom after adding
+        if (scrollAreaRef.current) {
+          const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+          if (viewport) {
+            setTimeout(() => {
+              viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+            }, 100);
+          }
+        }
       }
     } catch (err) {
       console.error('Error creating impact:', err);
@@ -104,218 +122,129 @@ export default function AddImpactDialog({
     }
   };
 
+  const handleCancelNewEntry = () => {
+    setShowForm(false);
+    setTitle('');
+    setDescription('');
+    setRelationType('Direct');
+    setDimension('Environmental');
+    setSdgs([]);
+    setScore('');
+  };
+
+  const handleSaveImpact = (impactId: number, updates: Partial<Impact>) => {
+    setSavingId(impactId);
+    updateImpactMutation.mutate(
+      { id: impactId, updates },
+      {
+        onSuccess: () => {
+          toast.success('Impact updated');
+          setSavingId(undefined);
+        },
+        onError: () => {
+          toast.error('Failed to update impact');
+          setSavingId(undefined);
+        },
+      },
+    );
+  };
+
+  const handleDeleteImpact = (impactId: number) => {
+    setDeletingId(impactId);
+    deleteImpactMutation.mutate(impactId, {
+      onSuccess: () => {
+        toast.success('Impact deleted');
+        setDeletingId(undefined);
+      },
+      onError: () => {
+        toast.error('Failed to delete impact');
+        setDeletingId(undefined);
+      },
+    });
+  };
+
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}>
-      <DialogContent
-        className={`sm:max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl ${backgroundColor}`}>
-        <DialogHeader className='mb-4'>
-          <DialogTitle className='text-xl font-semibold'>{sectionKey}</DialogTitle>
-          <DialogDescription>Add and manage entries for this section.</DialogDescription>
+      <DialogContent className={`sm:max-w-5xl max-h-[90vh] overflow-y-auto ${backgroundColor}`}>
+        <DialogHeader className='space-y-1 pb-4'>
+          <DialogTitle className='text-2xl font-semibold'>{sectionKey}</DialogTitle>
+          <DialogDescription className='text-sm text-muted-foreground'>
+            Add and manage entries for this section
+          </DialogDescription>
         </DialogHeader>
 
-        <div className='space-y-8'>
-          {/* FORM */}
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className='space-y-4'>
-              {/* Title + Description */}
-              <div className='grid gap-4 md:grid-cols-[2fr,3fr]'>
-                <FormField
-                  control={form.control}
-                  name='title'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter title'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+        <ScrollArea
+          className='max-h-[60vh] pr-4'
+          ref={scrollAreaRef}>
+          <div className='space-y-6'>
+            {/* Existing Impacts */}
+            {existingImpacts.length > 0 && (
+              <ImpactList
+                impacts={existingImpacts}
+                onSave={handleSaveImpact}
+                onDelete={handleDeleteImpact}
+                savingId={savingId}
+                deletingId={deletingId}
+              />
+            )}
+
+            {/* New Entry Form - only shown when showForm is true */}
+            {showForm && (
+              <div className='space-y-3'>
+                <ImpactForm
+                  title={title}
+                  description={description}
+                  relationType={relationType}
+                  dimension={dimension}
+                  sdgs={sdgs}
+                  score={score}
+                  onTitleChange={setTitle}
+                  onDescriptionChange={setDescription}
+                  onRelationTypeChange={setRelationType}
+                  onDimensionChange={setDimension}
+                  onSdgsChange={setSdgs}
+                  onScoreChange={setScore}
                 />
-                <FormField
-                  control={form.control}
-                  name='description'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description / Notes</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          rows={2}
-                          placeholder='Enter description or notes (optional)'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Action Buttons Below Form */}
+                <div className='flex justify-end'>
+                  <div className='gap-2 flex bg-white/40 p-2 rounded-b-xl'>
+                    <Button
+                      variant='default'
+                      onClick={handleSaveNewEntry}
+                      disabled={createImpactMutation.isPending}
+                      className=''>
+                      {createImpactMutation.isPending ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      variant='outline'
+                      onClick={handleCancelNewEntry}
+                      disabled={createImpactMutation.isPending}>
+                      Remove
+                    </Button>
+                  </div>
+                </div>
               </div>
-
-              {/* Impact Type row */}
-              <div className='grid gap-4 md:grid-cols-4'>
-                <FormField
-                  control={form.control}
-                  name='relationType'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Impact Type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select type' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value='Direct'>Direct</SelectItem>
-                          <SelectItem value='Indirect'>Indirect</SelectItem>
-                          <SelectItem value='Hidden'>Hidden</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='dimension'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value='Environmental'>Environmental</SelectItem>
-                          <SelectItem value='Social'>Social</SelectItem>
-                          <SelectItem value='Economic'>Economic</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='sdgs'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SDGs</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Select SDG'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='score'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Impact score</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          min={1}
-                          max={10}
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Buttons row (top-right like mockup) */}
-              <div className='flex justify-end gap-2 pt-2'>
-                <Button
-                  variant='outline'
-                  type='button'>
-                  Save
-                </Button>
-                <Button
-                  variant='outline'
-                  type='button'>
-                  Remove
-                </Button>
-                <Button
-                  type='submit'
-                  disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? 'Adding...' : 'Add Entry'}
-                </Button>
-              </div>
-            </form>
-          </Form>
-
-          {/* EXISTING ENTRIES AS BOXES */}
-          {existingImpacts.length > 0 && (
-            <div className='space-y-3'>
-              <h3 className='text-sm font-semibold'>Existing Entries</h3>
-              <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
-                {existingImpacts.map((impact) => (
-                  <Card
-                    key={impact.id}
-                    className='relative flex flex-col gap-3 rounded-xl border bg-white/70 p-4 shadow-sm'>
-                    <button
-                      type='button'
-                      className='absolute right-3 top-2 text-lg text-muted-foreground hover:text-foreground'
-                      onClick={() => toast.info('Delete functionality coming soon')}>
-                      ×
-                    </button>
-
-                    <p className='text-sm font-medium'>{impact.title || 'No title'}</p>
-
-                    <div className='grid grid-cols-2 gap-2 text-xs text-muted-foreground'>
-                      <p>
-                        <span className='font-semibold'>Type: </span>
-                        {impact.relation}
-                      </p>
-                      <p>
-                        <span className='font-semibold'>Category: </span>
-                        {impact.dimension}
-                      </p>
-                      <p>
-                        <span className='font-semibold'>Score: </span>
-                        {impact.score}
-                      </p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Bottom buttons like "Cancel / Save All Changes" */}
-          <div className='flex justify-end gap-3 pt-4 border-t'>
-            <Button
-              variant='outline'
-              onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button>Save All Changes</Button>
+            )}
           </div>
+        </ScrollArea>
+
+        {/* Footer Buttons */}
+        <div className='flex justify-end gap-3 pt-6 border-t'>
+          <Button
+            variant='default'
+            onClick={handleAddEntry}
+            disabled={showForm}
+            className='bg-white hover:bg-gray-50 text-gray-700 border'>
+            Add Entry
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant='default'>Save All Changes</Button>
         </div>
       </DialogContent>
     </Dialog>
