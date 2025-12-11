@@ -101,10 +101,12 @@ export function AddProjectDialog() {
               email: c.email,
             });
             collaboratorResults.push(result);
-          } catch (collabError: any) {
+          } catch (collabError) {
             failedCount++;
             console.error(`Failed to add collaborator ${c.email}:`, collabError);
-            console.error('Error details:', collabError.message);
+            if (collabError instanceof Error) {
+              console.error('Error details:', collabError.message);
+            }
           }
         }
 

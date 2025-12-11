@@ -1,12 +1,15 @@
 import { SustainabilityCanvas } from '@/components/canvas';
+import { EditProjectTitleDialog } from '@/components/projects';
 import { Download, Pencil, Printer } from 'lucide-react';
 import { useProject } from '@/api/projects';
 import { useParams, Navigate } from '@tanstack/react-router';
+import { useState } from 'react';
 
 export default function CanvasPage() {
   // route: /app-layout/projects/$projectId/canvas
   const { projectId } = useParams({ from: '/app-layout/projects/$projectId' });
   const { data: project, isLoading: loading, isError: loadError } = useProject(projectId);
+  const [editTitleOpen, setEditTitleOpen] = useState(false);
 
   if (loading) {
     return (
@@ -33,7 +36,10 @@ export default function CanvasPage() {
       <div className='flex flex-1 items-baseline justify-between gap-3 mb-6'>
         <div className='flex items-baseline gap-3'>
           <h2>{project.title || 'Untitled Project'}</h2>
-          <Pencil />
+          <Pencil
+            className='cursor-pointer'
+            onClick={() => setEditTitleOpen(true)}
+          />
         </div>
         <div className='flex gap-3'>
           <Printer />
@@ -43,6 +49,13 @@ export default function CanvasPage() {
       <div className='h-150'>
         <SustainabilityCanvas projectId={projectId} />
       </div>
+
+      <EditProjectTitleDialog
+        open={editTitleOpen}
+        onOpenChange={setEditTitleOpen}
+        projectId={projectId}
+        currentTitle={project.title || ''}
+      />
     </div>
   );
 }
