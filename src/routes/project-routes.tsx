@@ -4,8 +4,8 @@ import ProjectsPage from '../pages/ProjectsPage';
 import ProjectIdPage from '../pages/ProjectIdPage';
 import CanvasPage from '../pages/CanvasPage';
 import AnalysisPage from '../pages/AnalysisPage';
-import CollaboratorsPage from '../pages/CollaboratorsPage';
 import { appLayoutRoute } from './app-layout-route';
+import TeamPage from '@/pages/TeamPage';
 
 // /projects
 export const projectsRoute = new Route({
@@ -42,9 +42,9 @@ export const projectAnalysisRoute = new Route({
   component: AnalysisPage,
 });
 
-// /projects/:projectId/collaborators
-export const projectCollaboratorsRoute = new Route({
+// /projects/:projectId/team
+export const projectTeamRoute = new Route({
   getParentRoute: () => projectRoute,
-  path: 'collaborators',
-  component: CollaboratorsPage,
+  path: 'team',
+  component: TeamPage,
 });
