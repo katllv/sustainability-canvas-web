@@ -37,8 +37,8 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
   }
 
   return (
-    <div className='w-full h-full flex flex-1 flex-col gap-3 flex-1 min-h-0'>
-      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0'>
+    <div className='w-full h-full flex flex-col gap-3'>
+      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0 print:break-inside-avoid'>
         <CanvasSection
           title='Key Stakeholders (KS)'
           backgroundColor='bg-the-light-blue'
@@ -71,7 +71,7 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
         />
       </div>
 
-      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0'>
+      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0 print:break-inside-avoid'>
         <CanvasSection
           title='Waste Management (WM)'
           backgroundColor='bg-the-light-blue'
@@ -84,18 +84,18 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
           impacts={getImpactsForSection('KTR')}
           onClick={() => handleOpenDialog('KTR', 'bg-the-light-blue')}
         />
-        <div className='flex flex-col gap-3'>
+        <div className='flex flex-col gap-3 min-h-0'>
           <CanvasSection
             title='Cost (CO)'
             backgroundColor='bg-the-orange'
-            className='flex-1'
+            className='flex-1 min-h-0'
             impacts={getImpactsForSection('CO')}
             onClick={() => handleOpenDialog('CO', 'bg-the-orange')}
           />
           <CanvasSection
             title='Revenue (RE)'
             backgroundColor='bg-the-green'
-            className='flex-1'
+            className='flex-1 min-h-0'
             impacts={getImpactsForSection('RE')}
             onClick={() => handleOpenDialog('RE', 'bg-the-green')}
           />
