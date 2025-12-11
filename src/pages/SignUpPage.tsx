@@ -24,8 +24,9 @@ export default function SignUpPage() {
         // Redirect to login page
         router.navigate({ to: '/login' });
       } else toast.error('Registration failed.');
-    } catch (error: any) {
-      toast.error(error.message || 'Authentication error');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Authentication error';
+      toast.error(errorMessage);
     }
   };
 

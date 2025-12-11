@@ -34,10 +34,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (token) {
       setToken(token);
       try {
-        const decoded = jwtDecode<JwtPayload>(token);
+        interface DecodedToken extends JwtPayload {
+          userId?: string;
+          email?: string;
+          Email?: string;
+        }
+        const decoded = jwtDecode<DecodedToken>(token);
         const userId = decoded?.userId || decoded?.sub;
         // Get email from JWT token
-        const emailFromToken = (decoded as any)?.email || (decoded as any)?.Email || '';
+        const emailFromToken = decoded?.email || decoded?.Email || '';
 
         if (userId) {
           // Try to fetch profile from API

@@ -32,7 +32,7 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
         )}
       </Link>
       <Link
-        to='/projects/$projectId/collaborators'
+        to='/projects/$projectId/team'
         params={{ projectId }}
         className='h-full flex items-end pb-3 px-2 text-base font-bold relative text-the-dark-blue'>
         Team

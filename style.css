@@ -6,7 +6,6 @@
 */
 @custom-variant dark (&:is(.dark *));
 
-
 body {
     @apply m-0 text-xl;
     font-family:
@@ -20,6 +19,10 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+    height: 100%;
 }
 
 code {
@@ -130,7 +133,7 @@ static const Color backgroundColor = Color.fromRGBO(255,
     --the-yellow: oklch(0.9482 0.0809 94.6);
     --the-dark-blue: oklch(0.4254 0.1083 254.41);
     --the-light-grey: oklch(0.9727 0.0017 247.84);
-    
+
     /* Admin Dashboard colors */
     --admin-blue: #C1E3FF;
     --admin-purple: #EBCEF3;
@@ -233,7 +236,7 @@ static const Color backgroundColor = Color.fromRGBO(255,
     --color-the-yellow: var(--the-yellow);
     --color-the-dark-blue: var(--the-dark-blue);
     --color-the-light-grey: var(--the-light-grey);
-    
+
     /* Admin Dashboard colors */
     --color-admin-blue: var(--admin-blue);
     --color-admin-purple: var(--admin-purple);
@@ -289,5 +292,56 @@ static const Color backgroundColor = Color.fromRGBO(255,
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* Custom scrollbar styles - universal semi-transparent black */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: transparent;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+/* Completely hide and disable buttons */
+*::-webkit-scrollbar-button:single-button {
+    display: block;
+    height: 0;
+    width: 0;
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Print styles */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    @page {
+        margin: 10mm;
     }
 }

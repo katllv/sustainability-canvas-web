@@ -21,8 +21,9 @@ export default function LoginPage() {
         toast.success('Logged in successfully!');
         router.navigate({ to: '/' });
       } else toast.error('Login failed.');
-    } catch (error: any) {
-      toast.error(error.message || 'Authentication error');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Authentication error';
+      toast.error(errorMessage);
     }
   };
 

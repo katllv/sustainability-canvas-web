@@ -76,7 +76,7 @@ export default function ProjectsPage() {
             key={project.id}
             to='/projects/$projectId/canvas'
             params={{ projectId: project.id }}>
-            <Card className='h-full hover:shadow-lg transition-shadow cursor-pointer border hover:border-the-dark-blue'>
+            <Card className='h-full cursor-pointer border hover:border-the-dark-blue'>
               <CardHeader>
                 <div className='flex justify-between items-start'>
                   <CardTitle className='text-lg text-the-dark-blue'>{project.title}</CardTitle>
