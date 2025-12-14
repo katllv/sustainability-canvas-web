@@ -6,13 +6,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateImpact, useDeleteImpact, useUpdateImpact } from '@/api/impacts';
 import type { SectionType, Impact, SDGId } from '@/api/impacts';
 import ImpactForm from './ImpactForm';
 import ImpactList from './ImpactList';
+import { SECTION_QUESTIONS, SECTION_TITLES } from '@/lib/section-questions';
 
 type Props = {
   open: boolean;
@@ -89,7 +92,7 @@ export default function AddImpactDialog({
         type: sectionKey,
         relation: relationType as 'Direct' | 'Indirect' | 'Hidden',
         dimension: dimension as 'Environmental' | 'Social' | 'Economic',
-        score: parseInt(score) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10,
+        score: parseInt(score) as 1 | 2 | 3 | 4 | 5,
         description: description || undefined,
         sdgIds: sdgs,
       });
@@ -169,7 +172,34 @@ export default function AddImpactDialog({
       onOpenChange={onOpenChange}>
       <DialogContent className={`sm:max-w-5xl max-h-[90vh] overflow-y-auto ${backgroundColor}`}>
         <DialogHeader className='space-y-1 pb-4'>
-          <DialogTitle className='text-2xl font-semibold'>{sectionKey}</DialogTitle>
+          <div className='flex items-center gap-2'>
+            <DialogTitle className='text-2xl font-semibold'>
+              {SECTION_TITLES[sectionKey]}
+            </DialogTitle>
+            {SECTION_QUESTIONS[sectionKey] && SECTION_QUESTIONS[sectionKey].length > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className='inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted/80 cursor-help'>
+                      <Info className='h-4 w-4 text-muted-foreground' />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side='right'
+                    className='max-w-md'>
+                    <div className='space-y-2'>
+                      <p className='font-semibold text-sm'>Guiding Questions:</p>
+                      <ul className='space-y-1 text-xs list-disc pl-4'>
+                        {SECTION_QUESTIONS[sectionKey].map((question, idx) => (
+                          <li key={idx}>{question}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
           <DialogDescription className='text-sm text-muted-foreground'>
             Add and manage entries for this section
           </DialogDescription>

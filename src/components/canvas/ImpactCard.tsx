@@ -11,6 +11,8 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import SDGMultiSelect from './SDGMultiSelect';
 import type { Impact, RelationType, Dimension, SDGId } from '@/api/impacts';
 
@@ -53,7 +55,7 @@ export default function ImpactCard({
   return (
     <div className='space-y-3'>
       <Card className='rounded-xl bg-white/40 p-6 mb-0 rounded-br-none'>
-        <div className='grid grid-cols-[1fr_1fr_0.5fr] gap-4'>
+        <div className='grid grid-cols-[1fr_1fr_0.6fr] gap-4'>
           {/* First Column */}
           <div className='space-y-4'>
             {/* Title */}
@@ -104,13 +106,13 @@ export default function ImpactCard({
           </div>
 
           {/* Second Column - Description (spans full height) */}
-          <div>
+          <div className='min-w-0'>
             <Label className='text-sm font-medium'>Description</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder='Enter description'
-              className='mt-1 bg-white resize-none h-29'
+              className='mt-1 bg-white resize-none h-29 w-full break-words'
             />
           </div>
 
@@ -124,23 +126,38 @@ export default function ImpactCard({
 
             {/* Impact Score */}
             <div>
-              <Label className='text-sm font-medium'>Score</Label>
+              <div className='flex items-center justify-between'>
+                <Label className='text-sm font-medium'>Score</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className='inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-muted/80 cursor-help'>
+                        <Info className='h-3 w-3 text-muted-foreground' />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side='right'
+                      className='max-w-xs'>
+                      <p className='text-xs'>
+                        Rate the impact from negative (1) to positive (5) based on its effect on
+                        sustainability.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <Select
                 value={score.toString()}
-                onValueChange={(v) =>
-                  setScore(parseInt(v) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)
-                }>
+                onValueChange={(v) => setScore(parseInt(v) as 1 | 2 | 3 | 4 | 5)}>
                 <SelectTrigger className='mt-1 bg-white w-full'>
-                  <SelectValue placeholder='Select from 1-10' />
+                  <SelectValue placeholder='Select from 1-5' />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                    <SelectItem
-                      key={num}
-                      value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value='1'>1 - Negative</SelectItem>
+                  <SelectItem value='2'>2 - Slightly negative</SelectItem>
+                  <SelectItem value='3'>3 - Neutral</SelectItem>
+                  <SelectItem value='4'>4 - Slightly positive</SelectItem>
+                  <SelectItem value='5'>5 - Positive</SelectItem>
                 </SelectContent>
               </Select>
             </div>

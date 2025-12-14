@@ -68,10 +68,10 @@ export default function SDGMultiSelect({ value, onChange, label = 'SDGs' }: SDGM
             role='combobox'
             aria-expanded={open}
             className='mt-1 w-full justify-between bg-white font-normal h-auto min-h-10'>
-            <div className='flex flex-wrap gap-1'>
+            <div className='flex flex-wrap gap-1 overflow-hidden'>
               {value.length === 0 ? (
                 <span className='text-muted-foreground'>Select SDGs...</span>
-              ) : (
+              ) : value.length < 2 ? (
                 value.map((id) => (
                   <Badge
                     key={id}
@@ -84,6 +84,8 @@ export default function SDGMultiSelect({ value, onChange, label = 'SDGs' }: SDGM
                     />
                   </Badge>
                 ))
+              ) : (
+                <span className='text-sm'>{value.length} SDGs selected</span>
               )}
             </div>
             <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />

@@ -17,7 +17,7 @@ const getToken = () => localStorage.getItem('jwt') || '';
 export type SectionType = 'UVP' | 'CS' | 'CR' | 'CH' | 'GO' | 'KS' | 'KA' | 'WM' | 'KTR' | 'CO' | 'RE'
 export type RelationType = 'Direct' | 'Indirect' | 'Hidden'
 export type Dimension = 'Environmental' | 'Social' | 'Economic'
-export type ImpactScore = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+export type ImpactScore = 1 | 2 | 3 | 4 | 5
 
 export type SDGId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17
 
@@ -116,9 +116,9 @@ export function useCreateImpact() {
     return useMutation({
         mutationFn: createImpact,
         onSuccess: (newImpact, variables) => {
-            // Optimistically add the new impact to cache
-            queryClient.setQueriesData<Impact[]>(
-                { queryKey: ['projectImpacts', String(variables.projectId)] },
+            // Update the specific project impacts cache
+            queryClient.setQueryData<Impact[]>(
+                ['projectImpacts', String(variables.projectId)],
                 (old) => {
                     if (!old) return [newImpact];
                     return [...old, newImpact];
