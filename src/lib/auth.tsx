@@ -165,6 +165,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
 
       const ok = setAuthFromResponse(data);
+
+      // Refetch profile to get complete data including avatar and role
+      if (ok && data.token) {
+        try {
+          const decoded = jwtDecode<{ userId?: string; sub?: string }>(data.token);
+          const userId = decoded?.userId || decoded?.sub;
+
+          if (userId) {
+            const profileRes = await fetch(`${API_URL}/api/profiles/${userId}`, {
+              headers: { Authorization: `Bearer ${data.token}` },
+            });
+
+            if (profileRes.ok) {
+              const profileData = await profileRes.json();
+              const roleValue = profileData.role ?? profileData.Role;
+              const role =
+                roleValue === null || roleValue === undefined || isNaN(Number(roleValue))
+                  ? 0
+                  : Number(roleValue);
+
+              setUser({
+                id: userId,
+                email: profileData.email || profileData.Email || username,
+                role: role,
+              });
+              setProfile({
+                id: String(profileData.id || profileData.Id),
+                name: profileData.name || profileData.Name || null,
+                profileUrl: profileData.profileUrl || profileData.ProfileUrl || null,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch profile after login:', error);
+        }
+      }
+
       setLoading(false);
       return ok;
     } catch {

@@ -144,7 +144,7 @@ export function useUpdateProject() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: ({ id, updates }: { id: string; updates: { title?: string; description?: string } }) => updateProject(id, updates),
-		onSuccess: (data, variables) => {
+		onSuccess: (_data, variables) => {
 			// Update the specific project cache
 			queryClient.setQueryData(['project', variables.id], (old: Record<string, unknown> | undefined) => {
 				if (!old) return old;
