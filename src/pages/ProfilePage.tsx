@@ -8,7 +8,7 @@ import { User, Briefcase, Building2, MapPin, Mail, Pencil, Check, X } from 'luci
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
-  const { profile: authProfile, user: authUser } = useAuth();
+  const { profile: authProfile, user: authUser, updateProfileState } = useAuth();
   const { data: profile } = useProfile(authProfile?.id || '');
   const updateProfileMutation = useUpdateProfile();
   const uploadPictureMutation = useUploadProfilePicture();
@@ -77,10 +77,15 @@ export default function ProfilePage() {
     reader.onload = async (e) => {
       try {
         const imageData = e.target?.result as string;
-        await uploadPictureMutation.mutateAsync({
+        const result = await uploadPictureMutation.mutateAsync({
           userId: profile.id,
           imageData,
         });
+
+        // Update auth context profile state directly with new profileUrl
+        if (result.profileUrl || result.ProfileUrl) {
+          updateProfileState({ profileUrl: result.profileUrl || result.ProfileUrl });
+        }
 
         toast.success('Profile picture updated successfully');
       } catch (error) {

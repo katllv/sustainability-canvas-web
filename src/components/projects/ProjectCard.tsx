@@ -1,8 +1,11 @@
 import { Link } from '@tanstack/react-router';
 import { Calendar, Users, Clock } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Collaborator {
+  profileId: number;
   name: string;
+  email?: string;
   profileUrl: string | null;
 }
 
@@ -84,12 +87,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 const name = getCollaboratorName(c);
                 const initials = getCollaboratorInitials(name);
                 return (
-                  <div
+                  <Avatar
                     key={idx}
-                    className='flex h-8 w-8 items-center justify-center rounded-full bg-the-light-blue text-xs border-2 border-white'
+                    className='h-8 w-8 border-2 border-white'
                     style={{ marginLeft: idx === 0 ? 0 : '-8px', zIndex: idx }}>
-                    {initials}
-                  </div>
+                    <AvatarImage
+                      src={c.profileUrl || undefined}
+                      className='object-cover'
+                    />
+                    <AvatarFallback className='bg-the-light-blue text-xs'>
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
                 );
               })}
             </div>

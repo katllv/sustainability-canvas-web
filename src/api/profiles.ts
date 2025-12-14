@@ -124,11 +124,35 @@ export function useUploadProfilePicture() {
         onSuccess: (data, variables) => {
             // Convert userId to string to match query key format
             const userIdStr = String(variables.userId);
-            // Directly update the cache with the new data
+            
+            // Directly update the profile cache with the new data
             queryClient.setQueryData(['profile', userIdStr], (old: Record<string, unknown> | undefined) => ({
                 ...old,
                 ...data,
             }));
+            
+            // Update all projects caches to reflect the new profile picture in collaborators
+            const newProfileUrl = data.profileUrl || data.ProfileUrl;
+            if (newProfileUrl) {
+                queryClient.setQueriesData(
+                    { queryKey: ['projects'] },
+                    (oldData: unknown) => {
+                        if (!Array.isArray(oldData)) return oldData;
+                        return oldData.map((project: Record<string, unknown>) => {
+                            if (!Array.isArray(project.collaborators)) return project;
+                            return {
+                                ...project,
+                                collaborators: project.collaborators.map((collab: Record<string, unknown>) => {
+                                    if (String(collab.profileId) === userIdStr) {
+                                        return { ...collab, profileUrl: newProfileUrl };
+                                    }
+                                    return collab;
+                                }),
+                            };
+                        });
+                    }
+                );
+            }
         },
     });
 }
@@ -150,7 +174,7 @@ export function useAddCollaborator() {
     onSuccess: (_newCollaborator, variables) => {
       // Refetch to get complete data with profile pic and name
       queryClient.invalidateQueries({ queryKey: ['projectCollaborators', variables.projectId] });
-        queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 }
@@ -178,13 +202,13 @@ export function useRemoveCollaborator() {
             } else {
                 // Just remove the collaborator from project cache
                 queryClient.setQueriesData<Array<{ profileId?: number }>>(
-                { queryKey: ['projectCollaborators'] },
-                (old) => {
-                    if (!old) return old;
+                    { queryKey: ['projectCollaborators'] },
+                    (old) => {
+                        if (!old) return old;
                         return old.filter((collab) => String(collab.profileId) !== variables.profileId);
-                }
-            );
-            queryClient.invalidateQueries({ queryKey: ['projects'] });
+                    }
+                );
+                queryClient.invalidateQueries({ queryKey: ['projects'] });
             }
         },
     });

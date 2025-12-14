@@ -33,6 +33,7 @@ export interface AuthContextType {
   signOut: () => void;
   token: string | null;
   refetchProfile: () => Promise<void>;
+  updateProfileState: (updates: Partial<Profile>) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

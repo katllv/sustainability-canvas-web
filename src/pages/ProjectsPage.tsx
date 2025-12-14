@@ -4,7 +4,9 @@ import { ProjectCard } from '@/components/projects/ProjectCard';
 import { EmptyProjectsState } from '@/components/projects/EmptyProjectsState';
 
 interface Collaborator {
+  profileId: number;
   name: string;
+  email?: string;
   profileUrl: string | null;
 }
 

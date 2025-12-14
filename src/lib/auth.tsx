@@ -92,8 +92,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
           return;
         }
-      } catch {
+      } catch (error) {
         // Invalid token
+        console.error('Invalid token:', error);
+        localStorage.removeItem('jwt');
+        setToken(null);
         setProfile(null);
       }
     }
@@ -105,9 +108,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     token?: string;
     user?: Record<string, unknown>;
     profile?: Record<string, unknown>;
+    id?: string | number;
+    email?: string;
+    role?: string | number;
   }): boolean => {
     // data is expected something like:
     // { message, token, user: { Id, Username, Role, Profile: { Id, Name, Email } } }
+    // OR { id, email, role, token, profile: { id, name } }
     if (!data?.token) {
       setProfile(null);
       setToken(null);
@@ -128,17 +135,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    // Set user data (from user object)
-    const userData = data.user as Record<string, unknown>;
-    const roleValue = userData.Role ?? userData.role;
+    // Set user data (from user object or root level)
+    const userData = (data.user as Record<string, unknown>) || data;
+    const roleValue = userData.Role ?? userData.role ?? data.role;
     const role =
       roleValue === null || roleValue === undefined || isNaN(Number(roleValue))
         ? 0
         : Number(roleValue);
 
     setUser({
-      id: String(userData.Id ?? userData.id ?? ''),
-      email: String(userData.Email ?? userData.email ?? ''),
+      id: String(userData.Id ?? userData.id ?? data.id ?? ''),
+      email: String(userData.Email ?? userData.email ?? data.email ?? ''),
       role: role,
     });
 
@@ -204,7 +211,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setLoading(false);
       return ok;
-    } catch {
+    } catch (error) {
+      console.error('Login failed:', error);
       setProfile(null);
       setToken(null);
       localStorage.removeItem('jwt');
@@ -222,18 +230,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(input),
       });
-      if (!res.ok) throw new Error('Register failed');
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || 'Register failed');
+      }
+
       const data = await res.json();
 
       const ok = setAuthFromResponse(data);
       setLoading(false);
       return ok;
-    } catch {
+    } catch (error) {
       setProfile(null);
       setToken(null);
       localStorage.removeItem('jwt');
       setLoading(false);
-      return false;
+      throw error; // Re-throw to let the calling code handle it
     }
   };
 
@@ -282,9 +295,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Update profile state directly without API call
+  const updateProfileState = (updates: Partial<Profile>) => {
+    if (!profile) return;
+    setProfile({ ...profile, ...updates });
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, login, register, signOut, token, refetchProfile }}>
+      value={{
+        user,
+        profile,
+        loading,
+        login,
+        register,
+        signOut,
+        token,
+        refetchProfile,
+        updateProfileState,
+      }}>
       {children}
     </AuthContext.Provider>
   );
