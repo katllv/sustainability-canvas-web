@@ -3,10 +3,36 @@ import { AdminCard } from '@/components/ui/admin-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
+import { useRegistrationCode, useSetRegistrationCode } from '@/api/users';
+import { toast } from 'sonner';
 
 export function PasswordManagementCard() {
   const [showPassword, setShowPassword] = useState(false);
-  const currentPassword = 'canvas2024';
+  const [newCode, setNewCode] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { data: codeData, isLoading } = useRegistrationCode();
+  const setCodeMutation = useSetRegistrationCode();
+
+  const currentPassword = codeData?.code || '';
+
+  const handleReset = async () => {
+    if (!newCode.trim()) {
+      toast.error('Please enter a new password');
+      return;
+    }
+
+    try {
+      await setCodeMutation.mutateAsync(newCode);
+      toast.success('Registration password updated successfully');
+      setNewCode('');
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(
+        `Failed to update registration password: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
 
   return (
     <AdminCard
@@ -22,7 +48,7 @@ export function PasswordManagementCard() {
           <div className='relative flex-1'>
             <Input
               type={showPassword ? 'text' : 'password'}
-              value={currentPassword}
+              value={isLoading ? 'Loading...' : currentPassword}
               readOnly
               className='pr-10'
             />
@@ -34,12 +60,33 @@ export function PasswordManagementCard() {
           </div>
           <Button
             variant='outline'
-            className='flex items-center gap-2'>
+            className='flex items-center gap-2'
+            onClick={() => setIsEditing(!isEditing)}>
             <RefreshCw className='w-4 h-4' />
-            Reset Password
+            {isEditing ? 'Cancel' : 'Change Password'}
           </Button>
         </div>
       </div>
+
+      {isEditing && (
+        <div className='mt-4'>
+          <label className='block text-sm font-medium mb-2'>New Sign-up Password</label>
+          <div className='flex gap-2'>
+            <Input
+              type='text'
+              value={newCode}
+              onChange={(e) => setNewCode(e.target.value)}
+              placeholder='Enter new password'
+              className='flex-1'
+            />
+            <Button
+              onClick={handleReset}
+              disabled={setCodeMutation.isPending || !newCode.trim()}>
+              {setCodeMutation.isPending ? 'Updating...' : 'Update'}
+            </Button>
+          </div>
+        </div>
+      )}
     </AdminCard>
   );
 }

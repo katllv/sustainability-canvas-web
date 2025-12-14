@@ -5,6 +5,8 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 // - DeleteUser: [DELETE] /api/users/admin/{userId}
 // - GetAllUsers: [GET] /api/users/admin/all
 // - UpdateEmail: [PUT] /api/users/email
+// - GetRegistrationCode: [GET] /api/management/registration-code
+// - SetRegistrationCode: [POST] /api/management/registration-code
 
 const getToken = () => localStorage.getItem('jwt') || '';
 
@@ -55,6 +57,29 @@ export async function updateEmail(email: string) {
 	return res.json();
 }
 
+export async function getRegistrationCode() {
+	const res = await fetch(`${API_URL}/api/management/registration-code`, {
+		headers: {
+			Authorization: `Bearer ${getToken()}`,
+		},
+	});
+	if (!res.ok) throw new Error('Failed to fetch registration code');
+	return res.json();
+}
+
+export async function setRegistrationCode(code: string) {
+	const res = await fetch(`${API_URL}/api/management/registration-code`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${getToken()}`,
+		},
+		body: JSON.stringify({ code }),
+	});
+	if (!res.ok) throw new Error('Failed to set registration code');
+	return res.json();
+}
+
 // --- TanStack Query hooks ---
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -71,7 +96,14 @@ export function useCreateAdmin() {
 		mutationFn: createAdmin,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['users'] });
+
 		},
+	});
+}
+
+export function useUpdateEmail() {
+	return useMutation({
+		mutationFn: updateEmail,
 	});
 }
 
@@ -81,6 +113,23 @@ export function useDeleteUser() {
 		mutationFn: deleteUser,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['users'] });
+		},
+	});
+}
+
+export function useRegistrationCode() {
+	return useQuery({
+		queryKey: ['registrationCode'],
+		queryFn: getRegistrationCode,
+	});
+}
+
+export function useSetRegistrationCode() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: setRegistrationCode,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['registrationCode'] });
 		},
 	});
 }
