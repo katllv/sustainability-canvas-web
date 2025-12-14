@@ -4,6 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 // - CreateAdmin: [POST] /api/users/admin/create
 // - DeleteUser: [DELETE] /api/users/admin/{userId}
 // - GetAllUsers: [GET] /api/users/admin/all
+// - UpdateEmail: [PUT] /api/users/email
 
 const getToken = () => localStorage.getItem('jwt') || '';
 
@@ -35,6 +36,22 @@ export async function getAllUsers() {
 		},
 	});
 	if (!res.ok) throw new Error('Failed to fetch users');
+	return res.json();
+}
+
+export async function updateEmail(email: string) {
+	const res = await fetch(`${API_URL}/api/users/email`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${getToken()}`,
+		},
+		body: JSON.stringify({ email }),
+	});
+	if (!res.ok) {
+		const errorText = await res.text();
+		throw new Error(errorText || 'Failed to update email');
+	}
 	return res.json();
 }
 
