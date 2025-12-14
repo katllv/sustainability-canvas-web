@@ -3,31 +3,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Mail, Trash2 } from 'lucide-react';
-import { useParams } from '@tanstack/react-router';
+import { useParams, useRouter } from '@tanstack/react-router';
 import { useProjectCollaborators, useAddCollaborator, useRemoveCollaborator } from '@/api/profiles';
 import { toast } from 'sonner';
+import { RemoveCollaboratorDialog } from '@/components/team';
 
 type Collaborator = {
   id: number;
-  profileId: number;
-  projectId: number;
-  profile?: {
-    id?: number;
-    userId?: number;
-    name?: string;
-    profileUrl?: string;
-    user?: {
-      email?: string;
-    };
-  };
+  profileId?: number;
+  name?: string;
+  email: string;
+  profileUrl?: string;
 };
 
 export default function TeamPage() {
   const { projectId } = useParams({ from: '/app-layout/projects/$projectId' });
+  const router = useRouter();
   const { data: collaborators = [], isLoading } = useProjectCollaborators(projectId);
   const addCollaboratorMutation = useAddCollaborator();
   const removeCollaboratorMutation = useRemoveCollaborator();
   const [email, setEmail] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [collaboratorToDelete, setCollaboratorToDelete] = useState<{
+    profileId: string;
+    name: string;
+  } | null>(null);
 
   const handleAddCollaborator = async () => {
     if (!email.trim()) {
@@ -45,35 +45,29 @@ export default function TeamPage() {
     }
   };
 
-  const handleRemoveCollaborator = async (collaboratorId: string) => {
+  const handleRemoveCollaborator = async (profileId: string) => {
     try {
-      await removeCollaboratorMutation.mutateAsync(collaboratorId);
-      toast.success('Collaborator removed');
+      const result = await removeCollaboratorMutation.mutateAsync({ projectId, profileId });
+
+      // Check if the project was deleted (when last collaborator is removed)
+      if (result?.projectDeleted) {
+        toast.success('Last collaborator removed. Project has been deleted.');
+        router.navigate({ to: '/projects' });
+      } else {
+        toast.success('Collaborator removed');
+      }
+
+      setDeleteDialogOpen(false);
+      setCollaboratorToDelete(null);
     } catch (err) {
       console.error('Error removing collaborator:', err);
       toast.error('Failed to remove collaborator');
     }
   };
 
-  const getCollaboratorInfo = (collaborator: Collaborator) => {
-    const profile = collaborator.profile;
-    const email = profile?.user?.email;
-    const name = profile?.name;
-    const initials =
-      name
-        ?.split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase() ||
-      email?.[0]?.toUpperCase() ||
-      '?';
-
-    return {
-      name: name || 'Unknown User',
-      email: email || 'No email',
-      initials,
-      profileUrl: profile?.profileUrl,
-    };
+  const openDeleteDialog = (profileId: string, name: string) => {
+    setCollaboratorToDelete({ profileId, name });
+    setDeleteDialogOpen(true);
   };
 
   return (
@@ -104,8 +98,15 @@ export default function TeamPage() {
           <div className='mt-4 text-muted-foreground'>No collaborators yet</div>
         ) : (
           <div className='mt-4 space-y-3'>
-            {(collaborators as Collaborator[]).map((collaborator) => {
-              const info = getCollaboratorInfo(collaborator);
+            {collaborators.map((collaborator: Collaborator) => {
+              const name = collaborator.name || collaborator.email.split('@')[0] || 'User';
+              const initials =
+                name
+                  .split(' ')
+                  .filter(Boolean)
+                  .map((n) => n[0])
+                  .join('')
+                  .toUpperCase() || 'U';
 
               return (
                 <div
@@ -113,21 +114,21 @@ export default function TeamPage() {
                   className='p-4 flex items-center justify-between bg-the-light-grey rounded-lg'>
                   <div className='flex items-center gap-3'>
                     <Avatar>
-                      <AvatarImage src={info.profileUrl} />
-                      <AvatarFallback>{info.initials}</AvatarFallback>
+                      <AvatarImage src={collaborator.profileUrl} />
+                      <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className='font-medium'>{info.name}</div>
+                      <div className='font-medium'>{name}</div>
                       <div className='flex items-center gap-1 text-sm text-muted-foreground'>
                         <Mail className='h-3 w-3' />
-                        {info.email}
+                        {collaborator.email}
                       </div>
                     </div>
                   </div>
                   <Button
                     variant='ghost'
                     size='icon'
-                    onClick={() => handleRemoveCollaborator(String(collaborator.id))}
+                    onClick={() => openDeleteDialog(String(collaborator.profileId), name)}
                     disabled={removeCollaboratorMutation.isPending}
                     className='text-destructive hover:text-destructive hover:bg-destructive/10'>
                     <Trash2 className='h-4 w-4' />
@@ -138,6 +139,15 @@ export default function TeamPage() {
           </div>
         )}
       </div>
+
+      <RemoveCollaboratorDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        collaboratorName={collaboratorToDelete?.name || ''}
+        onConfirm={() =>
+          collaboratorToDelete && handleRemoveCollaborator(collaboratorToDelete.profileId)
+        }
+      />
     </div>
   );
 }

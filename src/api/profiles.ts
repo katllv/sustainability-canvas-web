@@ -72,8 +72,8 @@ export async function addCollaborator(projectId: string, email: string) {
     return res.json();
 }
 
-export async function removeCollaborator(collaboratorId: string) {
-    const res = await fetch(`${API_URL}/api/collaborators/${collaboratorId}`, {
+export async function removeCollaborator(projectId: string, profileId: string) {
+    const res = await fetch(`${API_URL}/api/projects/${projectId}/collaborators/${profileId}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${getToken()}`,
@@ -147,15 +147,9 @@ export function useAddCollaborator() {
   return useMutation({
     mutationFn: ({ projectId, email }: { projectId: string; email: string }) =>
       addCollaborator(projectId, email),
-    onSuccess: (newCollaborator, variables) => {
-      // Optimistically add the new collaborator to cache
-      queryClient.setQueryData(
-        ['projectCollaborators', variables.projectId],
-        (old: unknown[] | undefined) => {
-          if (!old) return [newCollaborator];
-          return [...old, newCollaborator];
-        }
-      );
+    onSuccess: (_newCollaborator, variables) => {
+      // Refetch to get complete data with profile pic and name
+      queryClient.invalidateQueries({ queryKey: ['projectCollaborators', variables.projectId] });
         queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
@@ -163,17 +157,35 @@ export function useAddCollaborator() {
 export function useRemoveCollaborator() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: removeCollaborator,
-        onSuccess: (_data, collaboratorId) => {
-            // Optimistically remove the collaborator from all project caches
-            queryClient.setQueriesData<Array<{ id: number }>>(
+        mutationFn: ({ projectId, profileId }: { projectId: string; profileId: string }) =>
+            removeCollaborator(projectId, profileId),
+        onSuccess: (data, variables) => {
+            // If project was deleted, remove it from all caches
+            if (data?.projectDeleted) {
+                // Remove from projects list cache
+                queryClient.setQueriesData(
+                    { queryKey: ['projects'] },
+                    (old: unknown) => {
+                        if (!Array.isArray(old)) return old;
+                        return old.filter((project: Record<string, unknown>) => 
+                            String(project.id) !== variables.projectId
+                        );
+                    }
+                );
+                // Remove all queries related to this project
+                queryClient.removeQueries({ queryKey: ['project', variables.projectId] });
+                queryClient.removeQueries({ queryKey: ['projectCollaborators', variables.projectId] });
+            } else {
+                // Just remove the collaborator from project cache
+                queryClient.setQueriesData<Array<{ profileId?: number }>>(
                 { queryKey: ['projectCollaborators'] },
                 (old) => {
                     if (!old) return old;
-                    return old.filter((collab) => String(collab.id) !== collaboratorId);
+                        return old.filter((collab) => String(collab.profileId) !== variables.profileId);
                 }
             );
             queryClient.invalidateQueries({ queryKey: ['projects'] });
+            }
         },
     });
 }

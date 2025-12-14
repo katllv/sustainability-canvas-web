@@ -134,8 +134,18 @@ export function useCreateProject() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createProject,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    onSuccess: (newProject) => {
+      // Add the new project to the projects list cache
+      queryClient.setQueriesData(
+        { queryKey: ['projects'] },
+        (old: unknown) => {
+          if (!Array.isArray(old)) return [newProject];
+          return [...old, newProject];
+        }
+      );
+      
+      // Also set the individual project cache to prevent refetch when navigating to it
+      queryClient.setQueryData(['project', String(newProject.id)], newProject);
     },
   });
 }
