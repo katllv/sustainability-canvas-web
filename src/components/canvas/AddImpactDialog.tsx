@@ -23,7 +23,6 @@ type Props = {
   projectId: string;
   sectionKey: SectionType;
   existingImpacts: Impact[];
-  onCreated?: (impact: Impact) => void;
   backgroundColor?: string;
 };
 
@@ -33,7 +32,6 @@ export default function AddImpactDialog({
   projectId,
   sectionKey,
   existingImpacts,
-  onCreated,
   backgroundColor = '',
 }: Props) {
   const [showForm, setShowForm] = useState(false);
@@ -54,10 +52,20 @@ export default function AddImpactDialog({
   const deleteImpactMutation = useDeleteImpact();
 
   useEffect(() => {
-    if (existingImpacts.length === 0) {
-      setShowForm(true);
+    if (open) {
+      // When dialog opens, show form only if there are no existing impacts
+      setShowForm(existingImpacts.length === 0);
+    } else {
+      // When dialog closes, reset form state
+      setShowForm(false);
+      setTitle('');
+      setDescription('');
+      setRelationType('Direct');
+      setDimension('Environmental');
+      setSdgs([]);
+      setScore('');
     }
-  }, [existingImpacts.length]);
+  }, [open, existingImpacts.length]);
 
   useEffect(() => {
     if (showForm && scrollAreaRef.current) {
@@ -99,7 +107,6 @@ export default function AddImpactDialog({
 
       if (impact?.id) {
         toast.success('Impact added');
-        onCreated?.(impact);
         // Reset form
         setTitle('');
         setDescription('');

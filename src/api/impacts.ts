@@ -124,6 +124,8 @@ export function useCreateImpact() {
                     return [...old, newImpact];
                 }
             );
+            // Invalidate analysis data to refetch
+            queryClient.invalidateQueries({ queryKey: ['projectAnalysis', String(variables.projectId)] });
         },
     });
 }
@@ -143,6 +145,11 @@ export function useUpdateImpact() {
                     );
                 }
             );
+            // Invalidate analysis data for the project
+            const projectId = updatedImpact.projectId || (queryClient.getQueriesData<Impact[]>({ queryKey: ['projectImpacts'] })?.[0]?.[1]?.find((i) => i.id === id)?.projectId);
+            if (projectId) {
+                queryClient.invalidateQueries({ queryKey: ['projectAnalysis', String(projectId)] });
+            }
         },
     });
 }
@@ -174,9 +181,15 @@ export function useDeleteImpact() {
                 });
             }
         },
-        onSettled: () => {
+        onSettled: (_data, _error, impactId) => {
             // Always refetch to ensure data is in sync
             queryClient.invalidateQueries({ queryKey: ['projectImpacts'] });
+            // Also invalidate analysis data
+            const allImpacts = queryClient.getQueriesData<Impact[]>({ queryKey: ['projectImpacts'] });
+            const projectId = allImpacts?.[0]?.[1]?.find((i) => i.id === impactId)?.projectId;
+            if (projectId) {
+                queryClient.invalidateQueries({ queryKey: ['projectAnalysis', String(projectId)] });
+            }
         },
     });
 }

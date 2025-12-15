@@ -21,10 +21,6 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
     setDialogOpen(true);
   };
 
-  const handleImpactCreated = () => {
-    // No need to manually update - TanStack Query will refetch automatically
-  };
-
   const getImpactsForSection = (sectionType: string) => {
     return impacts.filter((impact: Impact) => impact.type === sectionType);
   };
@@ -123,7 +119,6 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
         projectId={projectId}
         sectionKey={selectedSection || 'UVP'}
         existingImpacts={selectedSection ? getImpactsForSection(selectedSection) : []}
-        onCreated={handleImpactCreated}
         backgroundColor={selectedColor}
       />
     </div>
