@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { User, Briefcase, Building2, MapPin, Mail, Pencil, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function ProfilePage() {
-  const { profile: authProfile, user: authUser, updateProfileState } = useAuth();
+  const { profile: authProfile, user: authUser, updateProfileState, loading } = useAuth();
   const { data: profile } = useProfile(authProfile?.id || '');
   const updateProfileMutation = useUpdateProfile();
   const uploadPictureMutation = useUploadProfilePicture();
@@ -95,6 +96,17 @@ export default function ProfilePage() {
     };
     reader.readAsDataURL(file);
   };
+
+  if (loading) {
+    return (
+      <div className='flex flex-col h-full items-center justify-center'>
+        <div className='flex items-center gap-3 mb-6'>
+          <Spinner size='md' />
+          <p className='text-muted-foreground'>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='max-w-2xl mx-auto py-4'>

@@ -6,6 +6,7 @@ import { useProjectImpacts, type Impact } from '@/api/impacts';
 import { useParams, Navigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import ExcelJS from 'exceljs';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function CanvasPage() {
   // route: /app-layout/projects/$projectId/canvas
@@ -78,7 +79,8 @@ export default function CanvasPage() {
   if (loading) {
     return (
       <div className='flex flex-col h-full'>
-        <div className='flex items-baseline gap-3 mb-6'>
+        <div className='flex items-center gap-3 mb-6'>
+          <Spinner size='lg' />
           <h2>Loading...</h2>
         </div>
       </div>

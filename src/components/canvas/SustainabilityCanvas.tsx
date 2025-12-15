@@ -2,6 +2,7 @@ import { CanvasSection } from './CanvasSection';
 import { useState } from 'react';
 import { useProjectImpacts, type Impact, type SectionType } from '@/api/impacts';
 import AddImpactDialog from './AddImpactDialog';
+import { Spinner } from '../ui/spinner';
 
 interface SustainabilityCanvasProps {
   projectId: string;
@@ -30,8 +31,11 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
 
   if (loading) {
     return (
-      <div className='w-full h-full flex items-center justify-center'>
-        <div className='text-gray-600'>Loading canvas...</div>
+      <div className='flex flex-col h-full'>
+        <div className='flex items-center gap-3 mb-6'>
+          <Spinner size='md' />
+          <p className='text-muted-foreground'>Loading canvas...</p>
+        </div>
       </div>
     );
   }

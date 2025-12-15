@@ -9,8 +9,8 @@ export default function AppLayout() {
   if (loading) {
     return (
       <div className='min-h-screen bg-the-light-grey flex items-center justify-center gap-2'>
-        <Spinner size='md' />
-        <p>Loading...</p>
+        <Spinner size='lg' />
+        <h2>Loading...</h2>
       </div>
     );
   }

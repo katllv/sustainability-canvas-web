@@ -1,5 +1,6 @@
 import { Users } from 'lucide-react';
 import { AdminCard } from '@/components/ui/admin-card';
+import { Spinner } from '../ui/spinner';
 
 interface UserWithProfile {
   id: string;
@@ -26,7 +27,10 @@ export function UserProfilesCard({ users, isLoading }: UserProfilesCardProps) {
       <p className='mb-4 text-sm'>Total registered users: {users?.length || 0}</p>
 
       {isLoading ? (
-        <p className='text-gray-500'>Loading users...</p>
+        <div className='flex items-center gap-3 mb-6'>
+          <Spinner size='md' />
+          <p className='text-gray-500'>Loading users...</p>
+        </div>
       ) : (
         <div className='rounded-lg overflow-hidden border'>
           <table className='w-full'>

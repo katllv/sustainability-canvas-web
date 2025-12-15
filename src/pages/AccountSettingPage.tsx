@@ -7,6 +7,7 @@ import { LogOut, Trash2 } from 'lucide-react';
 import ChangeEmailDialog from '@/components/settings/ChangeEmailDialog';
 import DeleteAccountDialog from '@/components/settings/DeleteAccountDialog';
 import { useNavigate } from '@tanstack/react-router';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function AccountSettingPage() {
   const { user, profile, signOut, loading } = useAuth();
@@ -31,9 +32,10 @@ export default function AccountSettingPage() {
 
   if (loading) {
     return (
-      <div className='container mx-auto py-8 px-6 max-w-5xl'>
-        <div className='flex justify-center items-center h-64'>
-          <p className='text-gray-500'>Loading...</p>
+      <div className='flex flex-col h-full items-center justify-center'>
+        <div className='flex items-center gap-3 mb-6'>
+          <Spinner size='md' />
+          <p className='text-muted-foreground'>Loading account settings...</p>
         </div>
       </div>
     );
