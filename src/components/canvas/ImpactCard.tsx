@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +39,45 @@ export default function ImpactCard({
     impact.impactSdgs?.map((sdg) => (sdg.sdgId || sdg.id) as SDGId).filter(Boolean) || [],
   );
   const [score, setScore] = useState(impact.score);
+  const [isActive, setIsActive] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Check if there are unsaved changes
+  const hasChanges =
+    title !== impact.title ||
+    description !== (impact.description || '') ||
+    relationType !== impact.relation ||
+    dimension !== impact.dimension ||
+    score !== impact.score ||
+    JSON.stringify([...sdgs].sort()) !==
+      JSON.stringify(
+        (
+          impact.impactSdgs?.map((sdg) => (sdg.sdgId || sdg.id) as SDGId).filter(Boolean) || []
+        ).sort(),
+      );
+
+  const showButtons = isActive || hasChanges;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Element;
+
+      // Check if click is within a dropdown/portal
+      const isInDropdown = target.closest('[role="listbox"], [data-radix-popper-content-wrapper]');
+
+      if (cardRef.current && !cardRef.current.contains(target) && !isInDropdown) {
+        // Don't deactivate if there are unsaved changes
+        if (!hasChanges) {
+          setIsActive(false);
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [hasChanges]);
 
   const handleSave = () => {
     onSave(impact.id, {
@@ -52,9 +91,27 @@ export default function ImpactCard({
     });
   };
 
+  const handleCancel = () => {
+    // Reset all fields to original values
+    setTitle(impact.title);
+    setDescription(impact.description || '');
+    setRelationType(impact.relation);
+    setDimension(impact.dimension);
+    setSdgs(impact.impactSdgs?.map((sdg) => (sdg.sdgId || sdg.id) as SDGId).filter(Boolean) || []);
+    setScore(impact.score);
+    setIsActive(false);
+  };
+
   return (
-    <div className='space-y-3'>
-      <Card className='rounded-xl bg-white/40 p-6 mb-0 rounded-br-none'>
+    <div
+      className='space-y-3'
+      ref={cardRef}>
+      <Card
+        className={`rounded-xl bg-white/40 p-6 mb-0 cursor-pointer ${showButtons ? 'rounded-br-none' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsActive(true);
+        }}>
         <div className='grid grid-cols-[1fr_1fr_0.6fr] gap-4'>
           {/* First Column */}
           <div className='space-y-4'>
@@ -166,23 +223,33 @@ export default function ImpactCard({
       </Card>
 
       {/* Action Buttons Below Card */}
-      <div className='flex justify-end'>
-        <div className='gap-2 flex bg-white/40 p-2 rounded-b-xl'>
-          <Button
-            variant='default'
-            onClick={handleSave}
-            disabled={isSaving || isDeleting}
-            className=''>
-            {isSaving ? 'Saving...' : 'Save'}
-          </Button>
-          <Button
-            variant='outline'
-            onClick={() => onDelete(impact.id)}
-            disabled={isSaving || isDeleting}>
-            {isDeleting ? 'Removing...' : 'Remove'}
-          </Button>
+      {showButtons && (
+        <div className='flex justify-end'>
+          <div className='gap-2 flex bg-white/40 p-2 rounded-b-xl'>
+            <Button
+              variant='destructive'
+              onClick={() => onDelete(impact.id)}
+              disabled={isSaving || isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+            <Button
+              variant='outline'
+              onClick={handleCancel}
+              disabled={isSaving || isDeleting}
+              className=''>
+              Cancel
+            </Button>
+
+            <Button
+              variant='default'
+              onClick={handleSave}
+              disabled={isSaving || isDeleting}
+              className=''>
+              {isSaving ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

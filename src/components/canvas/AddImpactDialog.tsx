@@ -41,7 +41,6 @@ export default function AddImpactDialog({
   const [dimension, setDimension] = useState('Environmental');
   const [sdgs, setSdgs] = useState<SDGId[]>([]);
   const [score, setScore] = useState('');
-
   const [savingId, setSavingId] = useState<number | undefined>();
   const [deletingId, setDeletingId] = useState<number | undefined>();
 
@@ -78,7 +77,7 @@ export default function AddImpactDialog({
     }
   }, [showForm]);
 
-  const handleAddEntry = () => {
+  const handleAddImpact = () => {
     setShowForm(true);
   };
 
@@ -248,17 +247,17 @@ export default function AddImpactDialog({
                 <div className='flex justify-end'>
                   <div className='gap-2 flex bg-white/40 p-2 rounded-b-xl'>
                     <Button
+                      variant='outline'
+                      onClick={handleCancelNewEntry}
+                      disabled={createImpactMutation.isPending}>
+                      Remove
+                    </Button>
+                    <Button
                       variant='default'
                       onClick={handleSaveNewEntry}
                       disabled={createImpactMutation.isPending}
                       className=''>
                       {createImpactMutation.isPending ? 'Saving...' : 'Save'}
-                    </Button>
-                    <Button
-                      variant='outline'
-                      onClick={handleCancelNewEntry}
-                      disabled={createImpactMutation.isPending}>
-                      Remove
                     </Button>
                   </div>
                 </div>
@@ -268,20 +267,18 @@ export default function AddImpactDialog({
         </ScrollArea>
 
         {/* Footer Buttons */}
-        <div className='flex justify-end gap-3 pt-6 border-t'>
-          <Button
-            variant='default'
-            onClick={handleAddEntry}
-            disabled={showForm}
-            className='bg-white hover:bg-gray-50 text-gray-700 border'>
-            Add Entry
-          </Button>
+        <div className='flex justify-end gap-3 pt-6'>
           <Button
             variant='outline'
             onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button variant='default'>Save All Changes</Button>
+          <Button
+            variant='default'
+            onClick={handleAddImpact}
+            disabled={showForm}>
+            Add New Impact
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
