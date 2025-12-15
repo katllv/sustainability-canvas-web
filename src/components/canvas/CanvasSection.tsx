@@ -39,31 +39,52 @@ export function CanvasSection({
           <CardTitle className='text-sm'>{title}</CardTitle>
         </CardHeader>
         <CardContent className='flex-1 min-h-0 p-0'>
-          <ScrollArea className='h-full px-6 pb-6'>
-            <div className='space-y-3'>
+          <ScrollArea className='h-full px-4 pb-6'>
+            <div className='space-y-2'>
               {impacts.length > 0 ? (
-                ['Direct', 'Indirect', 'Hidden'].map((relationType) => {
-                  const relatedImpacts = impacts.filter(
-                    (impact) => impact.relation === relationType,
-                  );
-                  if (relatedImpacts.length === 0) return null;
+                impacts.map((impact) => {
+                  // Determine score indicator
+                  const scoreIndicator = impact.score >= 4 ? '+' : impact.score <= 2 ? '-' : '0';
+                  // Dimension abbreviation
+                  const dimensionShort =
+                    impact.dimension === 'Environmental'
+                      ? 'E'
+                      : impact.dimension === 'Social'
+                        ? 'S'
+                        : 'Ec';
+                  // Relation type abbreviation
+                  const relationType =
+                    impact.relation === 'Direct' ? 'D' : impact.relation === 'Indirect' ? 'I' : 'H';
+                  // SDGs
+                  const sdgList = impact.impactSdgs
+                    ?.map((sdg) => sdg.sdgId || sdg.id)
+                    .filter((id): id is number => id !== undefined)
+                    .sort((a, b) => a - b)
+                    .join('/');
+
+                  // Show only first 3 SDGs if list is long
+                  const sdgDisplay =
+                    sdgList && sdgList.split('/').length > 3
+                      ? sdgList.split('/').slice(0, 3).join('/') + '/...'
+                      : sdgList;
 
                   return (
-                    <div key={relationType}>
-                      <div className='text-xs font-medium text-gray-700 mb-1 lowercase'>
-                        {relationType.toLowerCase()}:
-                      </div>
-                      <div className='space-y-1 ml-2'>
-                        {relatedImpacts.map((impact) => (
-                          <div
-                            key={impact.id}
-                            className='text-xs'>
-                            <span>
-                              {impact.score} {impact.dimension.toLowerCase()} - {impact.title}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                    <div
+                      key={impact.id}
+                      className='text-xs'>
+                      <span>[{relationType}]</span>
+                      <span className=''> • </span>
+                      <span className='font-medium'>{dimensionShort}</span>
+                      <span className=''> • </span>
+                      <span className='font-semibold'>{scoreIndicator}</span>
+                      <span className=''> • </span>
+                      <span>{impact.title}</span>
+                      {sdgDisplay && (
+                        <>
+                          <span className=''> • </span>
+                          <span className=''>SDG {sdgDisplay}</span>
+                        </>
+                      )}
                     </div>
                   );
                 })
