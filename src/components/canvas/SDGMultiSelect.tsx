@@ -13,26 +13,12 @@ import {
 } from '@/components/ui/command';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import type { SDGId } from '@/api/impacts';
+import { sdgReference } from '@/lib/analysis-constants';
 
-const SDG_OPTIONS: { value: SDGId; label: string }[] = [
-  { value: 1, label: 'No Poverty' },
-  { value: 2, label: 'Zero Hunger' },
-  { value: 3, label: 'Good Health and Well-being' },
-  { value: 4, label: 'Quality Education' },
-  { value: 5, label: 'Gender Equality' },
-  { value: 6, label: 'Clean Water and Sanitation' },
-  { value: 7, label: 'Affordable and Clean Energy' },
-  { value: 8, label: 'Decent Work and Economic Growth' },
-  { value: 9, label: 'Industry, Innovation and Infrastructure' },
-  { value: 10, label: 'Reduced Inequalities' },
-  { value: 11, label: 'Sustainable Cities and Communities' },
-  { value: 12, label: 'Responsible Consumption and Production' },
-  { value: 13, label: 'Climate Action' },
-  { value: 14, label: 'Life Below Water' },
-  { value: 15, label: 'Life on Land' },
-  { value: 16, label: 'Peace, Justice and Strong Institutions' },
-  { value: 17, label: 'Partnerships for the Goals' },
-];
+const SDG_OPTIONS = sdgReference.map((sdg) => ({
+  value: sdg.id as SDGId,
+  label: sdg.fullName,
+}));
 
 type SDGMultiSelectProps = {
   value: SDGId[];
