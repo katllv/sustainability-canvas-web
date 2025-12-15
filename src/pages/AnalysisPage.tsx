@@ -5,22 +5,30 @@ import { Spinner } from '@/components/ui/spinner';
 import {
   AnalysisSummaryCards,
   PieChartWithLegend,
+  ScoreBarChart,
   SDGBarChart,
   SDGReferenceGrid,
 } from '@/components/analysis';
-import { impactColors, dimensionColors } from '@/lib/analysis-constants';
+import { impactColors, dimensionColors, scoreColorMap } from '@/lib/analysis-constants';
+import { useProjectImpacts } from '@/api/impacts';
+import { exportAnalysisToExcel } from '@/lib/export-analysis';
 
 export default function AnalysisPage() {
   const { projectId } = useParams({ from: '/app-layout/projects/$projectId' });
   const { data: analysisData, isLoading: loading, error } = useProjectAnalysis(projectId);
+  const { data: impacts } = useProjectImpacts(projectId);
 
   function handlePrint() {
     window.print();
   }
 
   async function handleDownloadExcel() {
-    // Placeholder for Excel download functionality
-    alert('Excel download functionality is not yet implemented.');
+    if (!analysisData) {
+      alert('No analysis data to export');
+      return;
+    }
+
+    await exportAnalysisToExcel(analysisData, impacts, analysisData.projectTitle);
   }
 
   if (loading) {
@@ -45,7 +53,14 @@ export default function AnalysisPage() {
     );
   }
 
-  const { summary, impactDistribution, dimensionDistribution, sdgCounts } = analysisData;
+  const {
+    summary,
+    scoreDistribution,
+    impactDistribution,
+    dimensionDistribution,
+    sentimentDistribution,
+    sdgCounts,
+  } = analysisData;
 
   return (
     <div className='flex flex-col h-full print:block'>
@@ -70,9 +85,10 @@ export default function AnalysisPage() {
           totalEntries={summary.totalEntries}
           sdgsCovered={summary.sdgsCovered}
           activeDimensions={summary.activeDimensions}
+          averageScore={summary.averageScore}
         />
 
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
           <PieChartWithLegend
             title='Impact Distribution'
             description='Distribution of impact types across entries'
@@ -86,7 +102,16 @@ export default function AnalysisPage() {
             data={dimensionDistribution}
             colors={dimensionColors}
           />
+
+          <PieChartWithLegend
+            title='Score Distribution'
+            description='Distribution of positive, neutral and negative impacts'
+            data={sentimentDistribution}
+            colors={scoreColorMap}
+          />
         </div>
+
+        <ScoreBarChart scoreDistribution={scoreDistribution} />
 
         <SDGBarChart sdgCounts={sdgCounts} />
 

@@ -46,10 +46,18 @@ type Props = {
   title: string;
   description: string;
   data: DistributionData[];
-  colors: string[];
+  colors: string[] | Record<string, string>;
 };
 
 export default function PieChartWithLegend({ title, description, data, colors }: Props) {
+  const getColor = (entry: DistributionData, index: number) => {
+    if (Array.isArray(colors)) {
+      return colors[index];
+    } else {
+      return colors[entry.name] || '#cccccc';
+    }
+  };
+
   return (
     <Card className='h-[320px]'>
       <CardHeader className='pb-2'>
@@ -66,13 +74,13 @@ export default function PieChartWithLegend({ title, description, data, colors }:
                 data={data}
                 dataKey='value'
                 nameKey='name'
-                outerRadius={90}
+                outerRadius={80}
                 labelLine={false}
                 label={renderCustomizedLabel}>
                 {data.map((entry, index) => (
                   <Cell
                     key={entry.name}
-                    fill={colors[index]}
+                    fill={getColor(entry, index)}
                   />
                 ))}
               </Pie>
@@ -80,18 +88,21 @@ export default function PieChartWithLegend({ title, description, data, colors }:
           </ResponsiveContainer>
         </div>
         <div className='flex flex-wrap gap-2 mt-4'>
-          {data.map((d, i) => (
-            <span
-              key={d.name}
-              className='inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs'
-              style={{ backgroundColor: `${colors[i]}22` }}>
+          {data.map((d, i) => {
+            const color = getColor(d, i);
+            return (
               <span
-                className='w-2 h-2 rounded-full'
-                style={{ backgroundColor: colors[i] }}
-              />
-              {d.name}: {d.value}
-            </span>
-          ))}
+                key={d.name}
+                className='inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs'
+                style={{ backgroundColor: `${color}22` }}>
+                <span
+                  className='w-2 h-2 rounded-full'
+                  style={{ backgroundColor: color }}
+                />
+                {d.name}: {d.value}
+              </span>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

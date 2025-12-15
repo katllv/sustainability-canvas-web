@@ -6,11 +6,25 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 const getToken = () => localStorage.getItem('jwt') || '';
 
 export interface AnalysisData {
+  projectId: number;
+  projectTitle: string;
   summary: {
     totalEntries: number;
     sdgsCovered: number;
     activeDimensions: number;
+    averageScore: number;
+    positiveImpacts: number;
+    negativeImpacts: number;
+    neutralImpacts: number;
   };
+  scoreDistribution: Array<{
+    score: number;
+    count: number;
+  }>;
+  sentimentDistribution: Array<{
+    name: 'Negative' | 'Neutral' | 'Positive';
+    value: number;
+  }>;
   impactDistribution: Array<{
     name: 'Direct' | 'Indirect' | 'Hidden';
     value: number;

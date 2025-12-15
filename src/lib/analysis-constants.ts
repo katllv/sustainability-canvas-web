@@ -2,6 +2,20 @@ export const impactColors = ['#B6EBB2', '#C1E3FF', '#EBCEF3'];
 
 export const dimensionColors = ['#C1E3FF', '#ffc59bff', '#B6EBB2'];
 
+export const scoreColorMap: Record<string, string> = {
+  Negative: '#ffc59bff',
+  Neutral: '#fce793ff',
+  Positive: '#B6EBB2',
+};
+
+export const scoreColors: Record<number, string> = {
+  1: '#ffaa9bff', // red
+  2: '#ffc59bff', // orange
+  3: '#fce793ff', // yellow
+  4: '#B6EBB2', // light green
+  5: '#96e291ff', // green
+};
+
 export const sdgColors = [
   '#e5243b',
   '#dda63a',
