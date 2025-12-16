@@ -12,11 +12,16 @@ type Props = {
 };
 
 export default function ScoreBarChart({ scoreDistribution }: Props) {
-  const chartData = scoreDistribution.map((item) => ({
-    score: `Score ${item.score}`,
-    scoreValue: item.score,
-    count: item.count,
-  }));
+  // Ensure all scores 1-5 are present, even with 0 count
+  const allScores = [1, 2, 3, 4, 5];
+  const chartData = allScores.map((score) => {
+    const existing = scoreDistribution.find((item) => item.score === score);
+    return {
+      score: `Score ${score}`,
+      scoreValue: score,
+      count: existing?.count || 0,
+    };
+  });
 
   return (
     <Card>
