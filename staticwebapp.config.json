@@ -1,0 +1,8 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*.{png,jpg,gif,svg}", "/css/*", "/js/*", "/*.{css,js,json,ico,png,jpg,svg,woff,woff2,ttf,eot}"]
+  },
+  "routes": [],
+  "responseOverrides": {}
+}
