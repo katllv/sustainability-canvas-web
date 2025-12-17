@@ -38,10 +38,6 @@ export function UserProfilesCard({ users, isLoading }: UserProfilesCardProps) {
               <tr>
                 <th className='px-4 py-3 text-left text-sm font-semibold text-gray-700'>Name</th>
                 <th className='px-4 py-3 text-left text-sm font-semibold text-gray-700'>Email</th>
-                <th className='px-4 py-3 text-left text-sm font-semibold text-gray-700'>Created</th>
-                <th className='px-4 py-3 text-left text-sm font-semibold text-gray-700'>
-                  Last Active
-                </th>
               </tr>
             </thead>
             <tbody className='divide-y bg-white'>
@@ -51,8 +47,6 @@ export function UserProfilesCard({ users, isLoading }: UserProfilesCardProps) {
                   className='hover:bg-gray-50'>
                   <td className='px-4 py-3 text-sm'>{user.profile?.name || 'N/A'}</td>
                   <td className='px-4 py-3 text-sm'>{user.email}</td>
-                  <td className='px-4 py-3 text-sm text-gray-600'>2024-11-10</td>
-                  <td className='px-4 py-3 text-sm text-gray-600'>2024-11-17</td>
                 </tr>
               ))}
             </tbody>
