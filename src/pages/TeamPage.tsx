@@ -101,13 +101,17 @@ export default function TeamPage() {
             <div className='mt-4 space-y-3'>
               {collaborators.map((collaborator: Collaborator) => {
                 const name = collaborator.name || collaborator.email.split('@')[0] || 'User';
-                const initials =
-                  name
-                    .split(' ')
-                    .filter(Boolean)
-                    .map((n) => n[0])
-                    .join('')
-                    .toUpperCase() || 'U';
+                const initials = (() => {
+                  const letters =
+                    name
+                      .split(' ')
+                      .filter(Boolean)
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase() || 'U';
+
+                  return letters.length > 2 ? letters[0] + letters[letters.length - 1] : letters;
+                })();
 
                 return (
                   <div
