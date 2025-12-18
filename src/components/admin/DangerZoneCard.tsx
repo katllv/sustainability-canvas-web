@@ -1,8 +1,32 @@
 import { XCircle, Database } from 'lucide-react';
 import { AdminCard } from '@/components/ui/admin-card';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { DeleteAllDataDialog } from './DeleteAllDataDialog';
+import { CloseProjectDialog } from './CloseProjectDialog';
+import { useDeleteAllNonAdmin } from '@/api/users';
+import { toast } from 'sonner';
 
 export function DangerZoneCard() {
+  const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
+  const [closeProjectDialogOpen, setCloseProjectDialogOpen] = useState(false);
+  const deleteAllMutation = useDeleteAllNonAdmin();
+
+  const handleDeleteAllClick = () => {
+    setDeleteAllDialogOpen(true);
+  };
+
+  const handleConfirmDeleteAll = async () => {
+    try {
+      await deleteAllMutation.mutateAsync();
+      toast.success('All non-admin users and data deleted successfully');
+      setDeleteAllDialogOpen(false);
+    } catch (error) {
+      toast.error('Failed to delete data');
+      console.error('Delete all data error:', error);
+    }
+  };
+
   return (
     <AdminCard
       title='Danger Zone'
@@ -24,11 +48,12 @@ export function DangerZoneCard() {
           </div>
           <Button
             variant='outline'
-            className='flex items-center gap-2 border-2'
+            className='flex items-center gap-2 border-2 w-40'
             style={{
               color: 'var(--admin-red-button)',
               borderColor: 'var(--admin-red-button)',
-            }}>
+            }}
+            onClick={() => setCloseProjectDialogOpen(true)}>
             <XCircle className='w-4 h-4' />
             Close Project
           </Button>
@@ -44,13 +69,25 @@ export function DangerZoneCard() {
             </p>
           </div>
           <Button
-            className='flex items-center gap-2'
-            style={{ backgroundColor: 'var(--admin-red-button)' }}>
+            className='flex items-center gap-2 w-40'
+            style={{ backgroundColor: 'var(--admin-red-button)' }}
+            onClick={handleDeleteAllClick}
+            disabled={deleteAllMutation.isPending}>
             <Database className='w-4 h-4' />
-            Delete All Data
+            {deleteAllMutation.isPending ? 'Deleting...' : 'Delete All Data'}
           </Button>
         </div>
       </div>
+
+      <DeleteAllDataDialog
+        open={deleteAllDialogOpen}
+        onOpenChange={setDeleteAllDialogOpen}
+        onConfirm={handleConfirmDeleteAll}
+      />
+      <CloseProjectDialog
+        open={closeProjectDialogOpen}
+        onOpenChange={setCloseProjectDialogOpen}
+      />
     </AdminCard>
   );
 }
