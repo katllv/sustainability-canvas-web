@@ -12,6 +12,7 @@
 
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { QueryClient } from '@tanstack/react-query';
 import {
   AuthContext,
   type JwtPayload,
@@ -22,7 +23,13 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ 
+  children, 
+  queryClient 
+}: { 
+  children: React.ReactNode;
+  queryClient?: QueryClient;
+}) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -256,6 +263,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(null);
     setToken(null);
     localStorage.removeItem('jwt');
+    // Clear all query cache to ensure fresh data on next login
+    if (queryClient) {
+      queryClient.clear();
+    }
   };
 
   // Refetch profile from API
