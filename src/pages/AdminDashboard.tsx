@@ -1,5 +1,9 @@
 import { useAllUsers } from '@/api/users';
-import { UserProfilesCard, PasswordManagementCard, DangerZoneCard } from '@/components/admin';
+import {
+  UserProfilesCard,
+  RegistrationCodeManagementCard,
+  DangerZoneCard,
+} from '@/components/admin';
 
 export default function AdminDashboard() {
   const { data: users, isLoading } = useAllUsers();
@@ -16,7 +20,7 @@ export default function AdminDashboard() {
           users={users}
           isLoading={isLoading}
         />
-        <PasswordManagementCard />
+        <RegistrationCodeManagementCard />
         <DangerZoneCard />
       </div>
     </div>

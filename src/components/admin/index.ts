@@ -1,3 +1,3 @@
 export { UserProfilesCard } from './UserProfilesCard';
-export { PasswordManagementCard } from './PasswordManagementCard';
+export { RegistrationCodeManagementCard } from './RegistrationCodeManagementCard.tsx'
 export { DangerZoneCard } from './DangerZoneCard';
