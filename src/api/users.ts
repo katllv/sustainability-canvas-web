@@ -28,6 +28,21 @@ export async function deleteUser(userId: string) {
 		},
 	});
 	if (!res.ok) throw new Error('Failed to delete user');
+	// 204 No Content doesn't have a response body
+	if (res.status === 204) return;
+	return res.json();
+}
+
+export async function deleteAllNonAdmin() {
+	const res = await fetch(`${API_URL}/api/users/admin/delete-all-non-admin`, {
+		method: 'DELETE',
+		headers: {
+			Authorization: `Bearer ${getToken()}`,
+		},
+	});
+	if (!res.ok) throw new Error('Failed to delete all non-admin users');
+	// 204 No Content doesn't have a response body
+	if (res.status === 204) return;
 	return res.json();
 }
 
@@ -111,7 +126,22 @@ export function useDeleteUser() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: deleteUser,
+		onSuccess: (_, deletedUserId) => {
+			// Directly update the cache instead of refetching
+			queryClient.setQueryData(['users'], (oldData: Array<{ id: string }> | undefined) => {
+				if (!oldData) return oldData;
+				return oldData.filter((user) => user.id !== deletedUserId);
+			});
+		},
+	});
+}
+
+export function useDeleteAllNonAdmin() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: deleteAllNonAdmin,
 		onSuccess: () => {
+			// Invalidate and refetch the users list
 			queryClient.invalidateQueries({ queryKey: ['users'] });
 		},
 	});
