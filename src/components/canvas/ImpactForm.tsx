@@ -13,6 +13,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Info } from 'lucide-react';
 import SDGMultiSelect from './SDGMultiSelect';
 import type { SDGId } from '@/api/impacts';
+import { impactFormSchema } from '@/schemas';
+import { FieldError } from '@/components/ui/field';
+import { useMemo, useState } from 'react';
+import { z } from 'zod';
 
 type ImpactFormProps = {
   title: string;
@@ -43,6 +47,21 @@ export default function ImpactForm({
   onSdgsChange,
   onScoreChange,
 }: ImpactFormProps) {
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Validate current form values
+  const validationErrors = useMemo(() => {
+    const result = impactFormSchema.safeParse({
+      title,
+      description,
+      relationType,
+      dimension,
+      sdgs,
+      score,
+    });
+    return result.error ? z.flattenError(result.error).fieldErrors : {};
+  }, [title, description, relationType, dimension, sdgs, score]);
+
   return (
     <Card className='rounded-xl bg-white/40 p-6 mb-0 rounded-br-none'>
       <div className='grid grid-cols-[1fr_1fr_0.6fr] gap-4'>
@@ -54,9 +73,13 @@ export default function ImpactForm({
             <Input
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
+              onBlur={() => setTouched((prev) => ({ ...prev, title: true }))}
               placeholder='Enter title'
               className='mt-1 bg-white'
             />
+            {touched.title && validationErrors.title && (
+              <FieldError className='mt-1'>{validationErrors.title[0]}</FieldError>
+            )}
           </div>
 
           {/* Impact Type and Dimension */}
@@ -101,18 +124,30 @@ export default function ImpactForm({
           <Textarea
             value={description}
             onChange={(e) => onDescriptionChange(e.target.value)}
+            onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
             placeholder='Enter description'
             className='mt-1 bg-white resize-none h-29 w-full break-words'
           />
+          {touched.description && validationErrors.description && (
+            <FieldError className='mt-1'>{validationErrors.description[0]}</FieldError>
+          )}
         </div>
 
         {/* Third Column */}
         <div className='space-y-4'>
           {/* SDGs */}
-          <SDGMultiSelect
-            value={sdgs}
-            onChange={onSdgsChange}
-          />
+          <div>
+            <SDGMultiSelect
+              value={sdgs}
+              onChange={(value) => {
+                setTouched((prev) => ({ ...prev, sdgs: true }));
+                onSdgsChange(value);
+              }}
+            />
+            {touched.sdgs && validationErrors.sdgs && (
+              <FieldError className='mt-1'>{validationErrors.sdgs[0]}</FieldError>
+            )}
+          </div>
 
           {/* Impact Score */}
           <div>
@@ -138,7 +173,15 @@ export default function ImpactForm({
             </div>
             <Select
               value={score}
-              onValueChange={onScoreChange}>
+              onValueChange={(value) => {
+                setTouched((prev) => ({ ...prev, score: true }));
+                onScoreChange(value);
+              }}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setTouched((prev) => ({ ...prev, score: true }));
+                }
+              }}>
               <SelectTrigger className='mt-1 bg-white w-full'>
                 <SelectValue placeholder='Select from 1-5' />
               </SelectTrigger>
@@ -150,6 +193,9 @@ export default function ImpactForm({
                 <SelectItem value='5'>5 - Positive</SelectItem>
               </SelectContent>
             </Select>
+            {touched.score && validationErrors.score && (
+              <FieldError className='mt-1'>{validationErrors.score[0]}</FieldError>
+            )}
           </div>
         </div>
       </div>

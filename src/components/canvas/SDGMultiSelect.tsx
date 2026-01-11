@@ -11,7 +11,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import type { SDGId } from '@/api/impacts';
 import { sdgReference } from '@/lib/analysis-constants';
 
@@ -37,11 +37,6 @@ export default function SDGMultiSelect({ value, onChange, label = 'SDGs' }: SDGM
     }
   };
 
-  const removeSDG = (sdgId: SDGId, e: React.MouseEvent) => {
-    e.stopPropagation();
-    onChange(value.filter((id) => id !== sdgId));
-  };
-
   return (
     <div>
       <Label className='text-sm font-medium '>{label}</Label>
@@ -64,10 +59,6 @@ export default function SDGMultiSelect({ value, onChange, label = 'SDGs' }: SDGM
                     variant='secondary'
                     className='text-xs'>
                     SDG {id}
-                    <X
-                      className='ml-1 h-3 w-3 cursor-pointer hover:text-destructive'
-                      onClick={(e) => removeSDG(id, e)}
-                    />
                   </Badge>
                 ))
               ) : (
@@ -99,10 +90,10 @@ export default function SDGMultiSelect({ value, onChange, label = 'SDGs' }: SDGM
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'border-input'
                         }`}>
-                        {isSelected && <Check className='h-3 w-3' />}
+                        {isSelected && <Check className='text-white' />}
                       </div>
-                      <span>SDG {sdg.value}</span>
-                      <span className='ml-2 text-muted-foreground'>- {sdg.label}</span>
+                      <span className='min-w-12'>SDG {sdg.value}</span>
+                      <span className='ml-2 text-muted-foreground'>{sdg.label}</span>
                     </CommandItem>
                   );
                 })}
