@@ -17,9 +17,10 @@ import { signupRoute } from './signup';
 import { appLayoutRoute } from './app-layout-route';
 import { publicLayoutRoute } from './public-layout-route';
 import { accountSettingsRoute } from './account-settings-route';
+import { createAdminRoute } from './create-admin-route';
 
 const routeTree = rootRoute.addChildren([
-  publicLayoutRoute.addChildren([loginRoute, signupRoute]),
+  publicLayoutRoute.addChildren([loginRoute, signupRoute, createAdminRoute]),
   appLayoutRoute.addChildren([
     indexRoute,
     projectsRoute, // this is /projects

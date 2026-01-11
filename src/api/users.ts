@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 
 const getToken = () => localStorage.getItem('jwt') || '';
 
-export async function createAdmin(user: { email: string; password: string }) {
+export async function createAdmin(user: { name: string; email: string; password: string; masterpassword: string }) {
 	const res = await fetch(`${API_URL}/api/users/admin/create`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },

@@ -23,10 +23,10 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-export function AuthProvider({ 
-  children, 
-  queryClient 
-}: { 
+export function AuthProvider({
+  children,
+  queryClient,
+}: {
   children: React.ReactNode;
   queryClient?: QueryClient;
 }) {
@@ -173,7 +173,7 @@ export function AuthProvider({
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Email: username, Password: password }),
+        body: JSON.stringify({ Email: username.toLowerCase(), Password: password }),
       });
       if (!res.ok) throw new Error('Login failed');
       const data = await res.json();
@@ -235,7 +235,7 @@ export function AuthProvider({
       const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...input, email: input.email.toLowerCase() }),
       });
 
       if (!res.ok) {
