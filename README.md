@@ -13,7 +13,7 @@ A comprehensive web application for creating, managing, and analyzing sustainabi
 - [Building for Production](#building-for-production)
 - [Architecture](#architecture)
 - [Canvas Sections](#canvas-sections)
-- [Contributing](#contributing)
+- [Usage and Modification](#usage-and-modification)
 
 ## Overview
 
@@ -157,8 +157,8 @@ sustainability-canvas-web/
 ### Prerequisites
 
 - **Node.js** 18+ and npm/yarn/pnpm
-- **Azure Functions backend** running locally at `http://localhost:7071` for development
-- **Azure PostgreSQL database** accessible by the backend
+- **Backend API** running locally at http://localhost:7071 (see backend repository README)
+- **PostgreSQL database** accessible by the backend
 - Environment variables configured
 
 ### Environment Variables
@@ -175,7 +175,7 @@ VITE_API_URL=http://localhost:7071
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/katllv/sustainability-canvas-web.git
    cd sustainability-canvas-web
    ```
 
@@ -310,33 +310,5 @@ Each section includes guided questions to help users think critically about thei
 - Responsive grid layouts
 - Print-friendly layouts for reports
 
-## Contributing
-
-### Development Workflow
-
-1. Create a feature branch
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. Make changes and test thoroughly
-
-3. Ensure code quality
-   ```bash
-   npm run lint:fix
-   npm run format
-   npm run build
-   ```
-
-4. Commit with descriptive messages
-
-5. Push and create a pull request
-
-### Coding Standards
-
-- Write self-documenting code with clear variable names
-- Add comments for complex logic
-- Keep components focused and single-responsibility
-- Extract reusable logic into custom hooks
-- Use TypeScript strictly (avoid `any`)
-- Follow existing patterns in the codebase
+## Usage and Modification
+This repository is provided for reference and educational purposes. Developers who wish to modify or extend the project should clone or fork the repository and work independently in their own environment. Direct contributions to this repository are not expected.
