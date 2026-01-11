@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useRouter } from '@tanstack/react-router';
 import { useAuth } from '@/lib/useAuth';
 import { Button } from '@/components/ui/button';
@@ -6,21 +5,31 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Field, FieldError } from '@/components/ui/field';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, type LoginFormData } from '@/schemas';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const { login, loading } = useAuth();
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      const ok = await login(email, password);
+      const ok = await login(data.email, data.password);
       if (ok) {
         toast.success('Logged in successfully!');
         router.navigate({ to: '/' });
-      } else toast.error('Login failed.');
+      } else {
+        toast.error('Login failed.');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Authentication error';
       toast.error(errorMessage);
@@ -36,30 +45,26 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={handleLogin}
+            onSubmit={handleSubmit(onSubmit)}
             className='space-y-4'>
             <Field>
               <Input
                 id='email'
                 type='text'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder='Enter email'
-                required
+                {...register('email')}
               />
-              <FieldError />
+              {errors.email && <FieldError>{errors.email.message}</FieldError>}
             </Field>
 
             <Field>
               <Input
                 id='password'
                 type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 placeholder='Enter password'
-                required
+                {...register('password')}
               />
-              <FieldError />
+              {errors.password && <FieldError>{errors.password.message}</FieldError>}
             </Field>
 
             <Button

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useAuth } from '../lib/useAuth';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,24 +5,31 @@ import { Link, useRouter } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signUpSchema, type SignUpFormData } from '@/schemas';
 
 export default function SignUpPage() {
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [registrationCode, setRegistrationCode] = useState('');
-  const { register, loading } = useAuth();
+  const { register: registerUser, loading } = useAuth();
   const router = useRouter();
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+  });
+
+  const onSubmit = async (data: SignUpFormData) => {
     try {
-      const ok = await register({ password, name, email, registrationCode });
+      const ok = await registerUser(data);
       if (ok) {
         toast.success('Registered successfully!');
-        // Redirect to login page
         router.navigate({ to: '/login' });
-      } else toast.error('Registration failed.');
+      } else {
+        toast.error('Registration failed.');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Authentication error';
       toast.error(errorMessage);
@@ -39,54 +45,48 @@ export default function SignUpPage() {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={handleRegister}
+            onSubmit={handleSubmit(onSubmit)}
             className='space-y-4'>
             <Field>
               <Input
                 id='name'
                 type='text'
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 placeholder='Enter name'
-                required
+                {...register('name')}
               />
-              <FieldError />
+              {errors.name && <FieldError>{errors.name.message}</FieldError>}
             </Field>
 
             <Field>
               <Input
                 id='email'
                 type='text'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder='Enter email'
-                required
+                {...register('email')}
               />
-              <FieldError />
+              {errors.email && <FieldError>{errors.email.message}</FieldError>}
             </Field>
 
             <Field>
               <Input
                 id='password'
                 type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 placeholder='Enter password'
-                required
+                {...register('password')}
               />
-              <FieldError />
+              {errors.password && <FieldError>{errors.password.message}</FieldError>}
             </Field>
 
             <Field>
               <Input
                 id='registrationCode'
                 type='text'
-                value={registrationCode}
-                onChange={(e) => setRegistrationCode(e.target.value)}
                 placeholder='Enter registration code'
-                required
+                {...register('registrationCode')}
               />
-              <FieldError />
+              {errors.registrationCode && (
+                <FieldError>{errors.registrationCode.message}</FieldError>
+              )}
             </Field>
 
             <Button
