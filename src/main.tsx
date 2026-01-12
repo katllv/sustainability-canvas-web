@@ -30,7 +30,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider queryClient={queryClient}>
         <RouterProvider router={router} />
-        <Toaster />
+        <Toaster className='print:hidden' />
       </AuthProvider>
     </QueryClientProvider>
   </React.StrictMode>,

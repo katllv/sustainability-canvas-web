@@ -21,7 +21,7 @@ export function CanvasSection({
   const clickableClass = onClick ? 'cursor-pointer' : '';
 
   return (
-    <div className='h-full min-h-0 max-h-full flex overflow-hidden'>
+    <div className='h-full min-h-0 max-h-full flex overflow-hidden print:h-auto print:max-h-none'>
       <Card
         className={`${backgroundColor} w-full flex flex-col min-h-0 ${className} ${clickableClass}`}
         role={onClick ? 'button' : undefined}
@@ -38,8 +38,8 @@ export function CanvasSection({
         <CardHeader className='pb-2 flex-shrink-0'>
           <CardTitle className='text-sm'>{title}</CardTitle>
         </CardHeader>
-        <CardContent className='flex-1 min-h-0 p-0'>
-          <ScrollArea className='h-full px-4 pb-6'>
+        <CardContent className='flex-1 min-h-0 p-0 print:flex-none'>
+          <ScrollArea className='h-full px-4 pb-6 print:h-auto'>
             <div className='space-y-2'>
               {impacts.length > 0 ? (
                 impacts.map((impact) => {
