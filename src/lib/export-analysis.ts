@@ -229,7 +229,7 @@ export async function exportAnalysisToExcel(
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${projectTitle || 'project'}_analysis.xlsx`;
+  a.download = `${projectTitle || 'project'}_impacts_analysis.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
 }

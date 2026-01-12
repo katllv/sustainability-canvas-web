@@ -3,20 +3,27 @@ import { EditProjectTitleDialog } from '@/components/projects';
 import { Download, Pencil, Printer } from 'lucide-react';
 import { useProject } from '@/api/projects';
 import { useProjectImpacts } from '@/api/impacts';
+import { useProjectAnalysis } from '@/api/analysis';
 import { useParams, Navigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
-import { exportCanvasToExcel } from '@/lib/export-canvas';
+import { exportAnalysisToExcel } from '@/lib/export-analysis';
 
 export default function CanvasPage() {
   // route: /app-layout/projects/$projectId/canvas
   const { projectId } = useParams({ from: '/app-layout/projects/$projectId' });
   const { data: project, isLoading: loading, isError: loadError } = useProject(projectId);
   const { data: impacts = [] } = useProjectImpacts(projectId);
+  const { data: analysisData } = useProjectAnalysis(projectId);
   const [editTitleOpen, setEditTitleOpen] = useState(false);
 
   async function handleDownloadExcel() {
-    await exportCanvasToExcel(impacts, project?.title);
+    if (!analysisData) {
+      alert('No analysis data to export');
+      return;
+    }
+
+    await exportAnalysisToExcel(analysisData, impacts, project?.title);
   }
 
   function handlePrint() {
