@@ -95,6 +95,29 @@ export async function setRegistrationCode(code: string) {
 	return res.json();
 }
 
+export async function getMasterPassword() {
+	const res = await fetch(`${API_URL}/api/management/master-password`, {
+		headers: {
+			Authorization: `Bearer ${getToken()}`,
+		},
+	});
+	if (!res.ok) throw new Error('Failed to fetch master password');
+	return res.json();
+}
+
+export async function setMasterPassword(password: string) {
+	const res = await fetch(`${API_URL}/api/management/master-password`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${getToken()}`,
+		},
+		body: JSON.stringify({ NewMasterPassword: password }),
+	});
+	if (!res.ok) throw new Error('Failed to set master password');
+	return res.json();
+}
+
 // --- TanStack Query hooks ---
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -160,6 +183,23 @@ export function useSetRegistrationCode() {
 		mutationFn: setRegistrationCode,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['registrationCode'] });
+		},
+	});
+}
+
+export function useMasterPassword() {
+	return useQuery({
+		queryKey: ['masterPassword'],
+		queryFn: getMasterPassword,
+	});
+}
+
+export function useSetMasterPassword() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: setMasterPassword,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['masterPassword'] });
 		},
 	});
 }

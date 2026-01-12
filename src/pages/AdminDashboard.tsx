@@ -3,6 +3,7 @@ import {
   UserProfilesCard,
   RegistrationCodeManagementCard,
   DangerZoneCard,
+  MasterPasswordManagementCard,
 } from '@/components/admin';
 
 export default function AdminDashboard() {
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
           isLoading={isLoading}
         />
         <RegistrationCodeManagementCard />
+        <MasterPasswordManagementCard />
         <DangerZoneCard />
       </div>
     </div>
