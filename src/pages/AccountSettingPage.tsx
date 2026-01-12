@@ -42,38 +42,40 @@ export default function AccountSettingPage() {
   }
 
   return (
-    <div className='container mx-auto py-8 px-6 max-w-5xl'>
+    <div className='container mx-auto py-4 sm:py-8 px-4 sm:px-6 max-w-5xl'>
       <Card className='bg-white'>
-        <CardHeader className='border-b bg-white px-20 py-6'>
-          <CardTitle className='text-2xl font-semibold text-the-dark-blue'>
+        <CardHeader className='border-b bg-white px-4 sm:px-20 py-4 sm:py-6'>
+          <CardTitle className='text-xl sm:text-2xl font-semibold text-the-dark-blue'>
             Account settings
           </CardTitle>
         </CardHeader>
-        <CardContent className='px-20 py-8 space-y-8'>
+        <CardContent className='px-4 sm:px-20 py-6 sm:py-8 space-y-6 sm:space-y-8'>
           {/* Profile Information */}
           <div>
-            <h3 className='mb-4'>Profile Information</h3>
-            <div className='flex items-center gap-4 pl-6 bg-gray-50 px-4 py-3 rounded-md border border-gray-200'>
-              <Avatar className='h-16 w-16'>
+            <h3 className='mb-4 text-base sm:text-lg'>Profile Information</h3>
+            <div className='flex items-center gap-4 pl-2 sm:pl-6 bg-gray-50 px-4 py-3 rounded-md border border-gray-200'>
+              <Avatar className='h-12 w-12 sm:h-16 sm:w-16'>
                 <AvatarImage
                   className='object-cover mx-auto'
                   src={profile?.profileUrl || undefined}
                 />
-                <AvatarFallback className='bg-the-dark-blue text-white text-lg'>
+                <AvatarFallback className='bg-the-dark-blue text-white text-base sm:text-lg'>
                   {getInitials(profile?.name || user?.email || 'Test')}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className='font-medium text-gray-900 text-base'>{profile?.name || 'Admin'}</p>
-                <p className='text-sm text-gray-500'>{user?.email}</p>
+                <p className='font-medium text-gray-900 text-sm sm:text-base'>
+                  {profile?.name || 'Admin'}
+                </p>
+                <p className='text-xs sm:text-sm text-gray-500'>{user?.email}</p>
               </div>
             </div>
           </div>
 
           {/* Email Address */}
           <div>
-            <h3 className='mb-4'>Email Address</h3>
-            <div className='flex items-center gap-3'>
+            <h3 className='mb-4 text-base sm:text-lg'>Email Address</h3>
+            <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-3'>
               <div className='flex-1 bg-gray-50 px-4 py-2 rounded-md border border-gray-200'>
                 <div className='text-sm text-gray-700'>{user?.email}</div>
               </div>
@@ -90,9 +92,9 @@ export default function AccountSettingPage() {
 
           {/* Log Out */}
           <div>
-            <h3 className='mb-2'>Log out</h3>
+            <h3 className='mb-2 text-base sm:text-lg'>Log out</h3>
             <div className=''>
-              <div className='flex items-center justify-between bg-gray-50 px-4 py-3 rounded-md border border-gray-200'>
+              <div className='flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between bg-gray-50 px-4 py-3 rounded-md border border-gray-200 gap-3 sm:gap-0'>
                 <div className='text-gray-600 text-sm'>Sign out of your account</div>
                 <Button
                   variant='outline'
@@ -107,9 +109,9 @@ export default function AccountSettingPage() {
 
           {/* Delete Account */}
           <div>
-            <h3 className='mb-2'>Delete Account</h3>
+            <h3 className='mb-2 text-base sm:text-lg'>Delete Account</h3>
             <div className=''>
-              <div className='flex items-center justify-between bg-red-50 px-4 py-3 rounded-md border border-red-200'>
+              <div className='flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between bg-red-50 px-4 py-3 rounded-md border border-red-200 gap-3 sm:gap-0'>
                 <div className='text-red-600 text-sm'>
                   Permanently delete your account and all data
                 </div>

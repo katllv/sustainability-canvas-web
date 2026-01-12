@@ -10,7 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 export default function ProfilePage() {
   const { profile: authProfile, user: authUser, updateProfileState, loading } = useAuth();
-  const { data: profile } = useProfile(authProfile?.id || '');
+  const { data: profile, isLoading: profileLoading } = useProfile(authProfile?.id || '');
   const updateProfileMutation = useUpdateProfile();
   const uploadPictureMutation = useUploadProfilePicture();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,7 +97,7 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className='flex flex-col h-full items-center justify-center'>
         <div className='flex items-center gap-3 mb-6'>

@@ -23,11 +23,11 @@ export default function Header() {
 
   return (
     <nav className='w-full bg-white print:hidden'>
-      <div className=' flex h-24 px-6'>
-        <div className='flex flex-1 justify-between'>
+      <div className='flex h-16 sm:h-24 px-2 sm:px-6'>
+        <div className='flex flex-1 justify-between items-center gap-2'>
           {isInsideProject ? <ProjectTabs projectId={projectId} /> : <div></div>}
-          <div className='flex items-center space-x-10'>
-            <nav className='flex items-center space-x-8 font-bold'>
+          <div className='flex items-center space-x-4 sm:space-x-10'>
+            <nav className='flex items-center font-bold text-sm sm:text-xl'>
               <Link to='/projects'>Projects</Link>
             </nav>
             <AddProjectDialog />

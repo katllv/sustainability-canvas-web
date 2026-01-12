@@ -151,8 +151,9 @@ export function AddProjectDialog() {
       open={open}
       onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='has-[>svg]:px-5 rounded-full'>
-          Add project <Plus />
+        <Button className='has-[>svg]:px-5 rounded-full sm:px-4'>
+          <span className='hidden sm:inline'>Add project</span>
+          <Plus className='sm:ml-0' />
         </Button>
       </DialogTrigger>
 

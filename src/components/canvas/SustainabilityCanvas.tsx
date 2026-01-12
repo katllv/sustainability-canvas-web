@@ -1,4 +1,5 @@
 import { CanvasSection } from './CanvasSection';
+import { SustainabilityCanvasMobile } from './SustainabilityCanvasMobile';
 import { useState } from 'react';
 import { useProjectImpacts, type Impact, type SectionType } from '@/api/impacts';
 import AddImpactDialog from './AddImpactDialog';
@@ -38,7 +39,8 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
 
   return (
     <div className='w-full h-full flex flex-col gap-3'>
-      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0 print:break-inside-avoid'>
+      {/* Desktop view - original grid layout */}
+      <div className='hidden sm:grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0 print:break-inside-avoid'>
         <CanvasSection
           title='Key Stakeholders (KS)'
           backgroundColor='bg-the-light-blue'
@@ -71,7 +73,7 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
         />
       </div>
 
-      <div className='grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0 print:break-inside-avoid'>
+      <div className='hidden sm:grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] gap-3 flex-1 min-h-0 print:break-inside-avoid'>
         <CanvasSection
           title='Waste Management (WM)'
           backgroundColor='bg-the-light-blue'
@@ -113,6 +115,13 @@ export function SustainabilityCanvas({ projectId }: SustainabilityCanvasProps) {
           onClick={() => handleOpenDialog('GO', 'bg-the-yellow')}
         />
       </div>
+
+      {/* Mobile view */}
+      <SustainabilityCanvasMobile
+        impacts={impacts}
+        onSectionClick={handleOpenDialog}
+      />
+
       <AddImpactDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
