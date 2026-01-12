@@ -60,9 +60,9 @@ export function UserProfilesCard({ users, isLoading }: UserProfilesCardProps) {
           <p className='text-gray-500'>Loading users...</p>
         </div>
       ) : (
-        <div className='rounded-lg overflow-hidden border'>
+        <div className='rounded-lg overflow-hidden border max-h-[500px] overflow-y-auto'>
           <table className='w-full'>
-            <thead className='bg-gray-50 border-b'>
+            <thead className='bg-gray-50 border-b sticky top-0'>
               <tr>
                 <th className='px-4 py-3 text-left text-sm font-semibold text-gray-700'>Name</th>
                 <th className='px-4 py-3 text-left text-sm font-semibold text-gray-700'>Email</th>
