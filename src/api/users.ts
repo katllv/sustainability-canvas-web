@@ -177,6 +177,9 @@ export function useDeleteUser() {
 				if (!oldData) return oldData;
 				return oldData.filter((user) => user.id !== deletedUserId);
 			});
+			// Invalidate projects to update team members
+			queryClient.invalidateQueries({ queryKey: ['projects'] });
+			queryClient.invalidateQueries({ queryKey: ['projectCollaborators'] });
 		},
 	});
 }

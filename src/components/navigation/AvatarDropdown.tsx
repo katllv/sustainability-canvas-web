@@ -72,7 +72,7 @@ export function AvatarDropdown({ name, email, avatarUrl }: AvatarDropdownProps) 
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.navigate({ to: '/account-settings' })}>
           <Settings className='mr-2 inline-block size-4 text-the-dark-blue' />
-          Account settings
+          Account Settings
         </DropdownMenuItem>
         {isAdmin && (
           <>
