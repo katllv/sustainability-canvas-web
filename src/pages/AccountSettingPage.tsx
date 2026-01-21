@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, Trash2 } from 'lucide-react';
 import ChangeEmailDialog from '@/components/settings/ChangeEmailDialog';
+import ChangePasswordDialog from '@/components/settings/ChangePasswordDialog';
 import DeleteAccountDialog from '@/components/settings/DeleteAccountDialog';
 import { useNavigate } from '@tanstack/react-router';
 import { Spinner } from '@/components/ui/spinner';
@@ -13,6 +14,7 @@ export default function AccountSettingPage() {
   const { user, profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const [changeEmailOpen, setChangeEmailOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const handleLogout = () => {
@@ -88,6 +90,22 @@ export default function AccountSettingPage() {
             </div>
           </div>
 
+          {/* Password */}
+          <div>
+            <h3 className='mb-4 text-base sm:text-lg'>Password</h3>
+            <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-3'>
+              <div className='flex-1 bg-gray-50 px-4 py-2 rounded-md border border-gray-200'>
+                <div className='text-sm text-gray-700'>••••••••</div>
+              </div>
+              <Button
+                variant='outline'
+                onClick={() => setChangePasswordOpen(true)}
+                className='border-the-dark-blue text-the-dark-blue hover:bg-the-dark-blue hover:text-white'>
+                Change Password
+              </Button>
+            </div>
+          </div>
+
           <div className='h-px w-full bg-gray-300' />
 
           {/* Log Out */}
@@ -133,6 +151,10 @@ export default function AccountSettingPage() {
         open={changeEmailOpen}
         onOpenChange={setChangeEmailOpen}
         currentEmail={user?.email || ''}
+      />
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
       />
       <DeleteAccountDialog
         open={deleteAccountOpen}

@@ -72,6 +72,22 @@ export async function updateEmail(email: string) {
 	return res.json();
 }
 
+export async function changePassword(data: { currentPassword: string; newPassword: string }) {
+	const res = await fetch(`${API_URL}/api/users/password`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${getToken()}`,
+		},
+		body: JSON.stringify(data),
+	});
+	if (!res.ok) {
+		const errorText = await res.text();
+		throw new Error(errorText || 'Failed to change password');
+	}
+	return res.json();
+}
+
 export async function getRegistrationCode() {
 	const res = await fetch(`${API_URL}/api/management/registration-code`, {
 		headers: {
@@ -142,6 +158,12 @@ export function useCreateAdmin() {
 export function useUpdateEmail() {
 	return useMutation({
 		mutationFn: updateEmail,
+	});
+}
+
+export function useChangePassword() {
+	return useMutation({
+		mutationFn: changePassword,
 	});
 }
 
